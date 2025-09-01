@@ -22,5 +22,6 @@ def main():
     imgfile = '/home/aa/hongOpencv/data/lenna.bmp'
     img = cv2.imread(imgfile) # numpy 자료형
     print('img 자료형 : ', type(img), type(img[0,0]), img.shape, img.ndim, img.size, img.dtype)
+
 if __name__ == "__main__":
     main()
