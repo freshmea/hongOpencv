@@ -3,8 +3,8 @@ import numpy as np
 
 def main():
     switch_case = {
-        ord('r'): 1,
-        ord('g'): 10,
+        ord('r'): 10,
+        ord('g'): -10,
         ord('b'): 30,
         65361: "왼쪽 방향키",
         65363: "오른쪽 방향키",
@@ -22,7 +22,7 @@ def main():
         if key == 27: break
         try:
             print(f"key value : {image[0:0:1]}")
-            image[:] += switch_case[key]
+            cv2.add(image, switch_case[key], image)
             cv2.imshow("keyboard Event", image)
         except KeyError:
             result = -1
