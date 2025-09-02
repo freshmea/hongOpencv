@@ -11,10 +11,8 @@ def onMouse(event, x, y, flags, param):
     clone_img = image.copy()
     if event == cv2.EVENT_MOUSEMOVE:
         cv2.rectangle(clone_img, (x-10, y-10), (x+10, y+10), (255,0,0), -1)
-        print("move")
     elif event == cv2.EVENT_LBUTTONDOWN:
         mouse_position = (x, y)
-        print("up")
     elif event == cv2.EVENT_LBUTTONUP:
         cv2.line(image, mouse_position, (x,y), (255,255,255), 2)
     cv2.imshow("main", clone_img)
