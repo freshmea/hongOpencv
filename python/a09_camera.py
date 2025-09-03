@@ -9,7 +9,7 @@ def put_string(frame, text, pt, value, color=(120, 200, 90)):             # 문�
     cv2.putText(frame, text, pt, font, 0.7, (120, 200, 90), 2)  # 글자 적기
 
 def main():
-    cap = cv2.VideoCapture(0)
+    cap = cv2.VideoCapture("/home/aa/hongOpencv/data/vtest.avi")
 
     print(f"너비 {cap.get(cv2.CAP_PROP_FRAME_WIDTH)}")
     print(f"높이 {cap.get(cv2.CAP_PROP_FRAME_HEIGHT)}")
@@ -17,7 +17,8 @@ def main():
     print(f"포맷 {cap.get(cv2.CAP_PROP_FORMAT)}")
     print(f"노출 {cap.get(cv2.CAP_PROP_EXPOSURE)}")
     print(f"밝기 {cap.get(cv2.CAP_PROP_BRIGHTNESS)}")
-    
+    fps = cap.get(cv2.CAP_PROP_FPS)
+
     if not cap.isOpened():
         print("웹캠을 열 수 없습니다.")
         return
@@ -27,8 +28,10 @@ def main():
         if not ret:
             print("프레임을 읽지 못했습니다.")
             break
+        put_string(frame, "Width:", (10, 30), cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+        put_string(frame, "Height:", (10, 60), cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
         cv2.imshow("Webcam", frame)
-        if cv2.waitKey(1) & 0xFF == ord('q'):
+        if cv2.waitKey(int(1000 / fps)) & 0xFF == ord('q'):
             break
 
     cap.release()
