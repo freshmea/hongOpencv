@@ -2,7 +2,6 @@ import numpy as np
 import cv2
 
 def main():
-    list1, list2 = [1,2,3], [4,5,6]
     np.random.seed(10)
     a = np.random.randn(2,3)
     b = np.random.randn(3,2)
