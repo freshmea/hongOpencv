@@ -14,7 +14,8 @@ mouse_on = False
 
 
 # logo 및 마스크 준비
-logo = cv2.imread("/home/aa/hongOpencv/data/hong_logo.jpg", cv2.IMREAD_COLOR)
+# logo = cv2.imread("/home/aa/hongOpencv/data/hong_logo.jpg", cv2.IMREAD_COLOR)
+logo = cv2.imread("data/hong_logo.jpg", cv2.IMREAD_COLOR)
 logo = cv2.resize(logo, (50, 50), logo)
 logo = cv2.bitwise_not(logo)
 masks = cv2.threshold(logo, 220, 255, cv2.THRESH_BINARY)[1]
@@ -26,7 +27,8 @@ def put_ko_text(text, size):
     pt2 = (0, 0)
     korean_text = text
     font_size = size
-    font_path = '/home/aa/hongOpencv/data/NanumPenScript-Regular.ttf'  # 경로를 실제 폰트로 변경 (없으면 다운로드: Google Noto Sans KR)
+    # font_path = '/home/aa/hongOpencv/data/NanumPenScript-Regular.ttf'  # 경로를 실제 폰트로 변경 (없으면 다운로드: Google Noto Sans KR)
+    font_path = 'data/NanumPenScript-Regular.ttf'  # 경로를 실제 폰트로 변경 (없으면 다운로드: Google Noto Sans KR)
     try:
         font = ImageFont.truetype(font_path, font_size)
     except:
@@ -44,7 +46,7 @@ def put_ko_text(text, size):
     open_cv_img = cv2.cvtColor(np.array(text_img), cv2.COLOR_RGB2BGR)
     # 글자 있는 부분만 트립
     cv2.imshow("PIL text", open_cv_img)
-    
+
     return open_cv_img
 
 def input_logo(img):
