@@ -136,7 +136,7 @@ def main():
         key = cv2.waitKeyEx(30)
         if key == 27: break
         try:
-            cv2.add(image, switch_case[key], image)
+            cv2.add(image, switch_case[key], image) # type: ignore
             image = input_logo(image)
             cv2.imshow("main", image)
         except KeyError:
