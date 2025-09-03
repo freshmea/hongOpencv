@@ -1,11 +1,17 @@
 import cv2
 import numpy as np
+from PIL import Image, ImageDraw, ImageFont
 
 mouse_position = (0,0)
 screen_width = 800
 screen_height = 600
 image = np.zeros((screen_width, screen_height, 3), np.uint8)
 mouse_on = False
+
+# 한글 폰트 준비
+# 한국어 폰트 파일 경로 (시스템 폰트 사용, 예: Windows - 'malgun.ttf', macOS - 'AppleGothic.ttf', Linux - Noto Sans)
+
+
 
 # logo 및 마스크 준비
 logo = cv2.imread("/home/aa/hongOpencv/data/hong_logo.jpg", cv2.IMREAD_COLOR)
@@ -15,6 +21,31 @@ masks = cv2.threshold(logo, 220, 255, cv2.THRESH_BINARY)[1]
 masks = cv2.split(masks)
 # morph 확장
 masks = [cv2.morphologyEx(m, cv2.MORPH_DILATE, np.ones((3, 3), np.uint8), iterations=1) for m in masks]
+
+def put_ko_text(text, size):
+    pt2 = (0, 0)
+    korean_text = text
+    font_size = size
+    font_path = '/home/aa/hongOpencv/data/NanumPenScript-Regular.ttf'  # 경로를 실제 폰트로 변경 (없으면 다운로드: Google Noto Sans KR)
+    try:
+        font = ImageFont.truetype(font_path, font_size)
+    except:
+        font = ImageFont.load_default()  # 기본 폰트 (한글 지원 안 될 수 있음)
+    pil_img = Image.new('RGBA', (500, 350), (255, 255, 255, 0))
+    draw = ImageDraw.Draw(pil_img)
+    bbox = draw.textbbox((0, 0), korean_text, font=font)
+    text_width = bbox[2] - bbox[0]
+    text_height = bbox[3] - bbox[1]
+    x, y = pt2[0], pt2[1] - text_height
+    draw.text((x, y), korean_text, font=font, fill=(0, 0, 0, 255))
+    # bbox 이미지만 잘라서 cv2 이미지로 변환
+    text_img = pil_img.crop(bbox)
+    text_img = text_img.convert('RGB')
+    open_cv_img = cv2.cvtColor(np.array(text_img), cv2.COLOR_RGB2BGR)
+    # 글자 있는 부분만 트립
+    cv2.imshow("PIL text", open_cv_img)
+    
+    return open_cv_img
 
 def input_logo(img):
     global masks, logo
@@ -67,6 +98,8 @@ def main():
     cv2.namedWindow("main")
     cv2.setMouseCallback("main", onMouse)
     global image
+    image = input_logo(image)
+    ko_img =put_ko_text("안녕하세요", 30)
 
     while True:
         key = cv2.waitKeyEx(30)
