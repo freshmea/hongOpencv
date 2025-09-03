@@ -23,31 +23,59 @@ masks = cv2.split(masks)
 # morph 확장
 masks = [cv2.morphologyEx(m, cv2.MORPH_DILATE, np.ones((3, 3), np.uint8), iterations=1) for m in masks]
 
-def put_ko_text(text, size):
-    pt2 = (0, 0)
-    korean_text = text
-    font_size = size
-    # font_path = '/home/aa/hongOpencv/data/NanumPenScript-Regular.ttf'  # 경로를 실제 폰트로 변경 (없으면 다운로드: Google Noto Sans KR)
-    font_path = 'data/NanumPenScript-Regular.ttf'  # 경로를 실제 폰트로 변경 (없으면 다운로드: Google Noto Sans KR)
+def make_text_image(korean_text, font_size, color):
+    font_path = 'data/NanumPenScript-Regular.ttf'
     try:
         font = ImageFont.truetype(font_path, font_size)
     except:
-        font = ImageFont.load_default()  # 기본 폰트 (한글 지원 안 될 수 있음)
-    pil_img = Image.new('RGBA', (500, 350), (255, 255, 255, 0))
-    draw = ImageDraw.Draw(pil_img)
-    bbox = draw.textbbox((0, 0), korean_text, font=font)
+        font = ImageFont.load_default()
+
+    # 임시 이미지로 텍스트 크기 측정
+    temp_img = Image.new('RGBA', (1, 1))
+    temp_draw = ImageDraw.Draw(temp_img)
+    bbox = temp_draw.textbbox((0, 0), korean_text, font=font)
     text_width = bbox[2] - bbox[0]
     text_height = bbox[3] - bbox[1]
-    x, y = pt2[0], pt2[1] - text_height
-    draw.text((x, y), korean_text, font=font, fill=(0, 0, 0, 255))
-    # bbox 이미지만 잘라서 cv2 이미지로 변환
-    text_img = pil_img.crop(bbox)
-    text_img = text_img.convert('RGB')
-    open_cv_img = cv2.cvtColor(np.array(text_img), cv2.COLOR_RGB2BGR)
-    # 글자 있는 부분만 트립
-    cv2.imshow("PIL text", open_cv_img)
 
+    # 텍스트 크기에 맞는 이미지 생성 (여백 추가)
+    margin = 5
+    img_width = text_width + margin * 2
+    img_height = text_height + margin * 2
+
+    pil_img = Image.new('RGBA', (img_width, img_height), (0,0,0,0))
+    draw = ImageDraw.Draw(pil_img)
+
+    # 여백을 고려한 텍스트 위치 (bbox의 음수 오프셋 보정)
+    x = margin - bbox[0]
+    y = margin - bbox[1]
+
+    draw.text((x, y), korean_text, font=font, fill=color)
+
+    # RGB로 변환 후 OpenCV 이미지로 변환
+    pil_img = pil_img.convert('RGB')
+    open_cv_img = cv2.cvtColor(np.array(pil_img), cv2.COLOR_RGB2BGR)
     return open_cv_img
+
+def blit(img, x, y, text_img, mask=None):
+    h, w = text_img.shape[:2]
+    if y + h > img.shape[0] or x + w > img.shape[1]:
+        return img  # 이미지 크기를 벗어나면 아무 작업도 하지 않음
+
+    roi = img[y:y+h, x:x+w]
+
+    # 텍스트 이미지의 검은색 배경을 마스크로 사용
+    gray = cv2.cvtColor(text_img, cv2.COLOR_BGR2GRAY)
+    if mask is None:
+        _, mask = cv2.threshold(gray, 10, 255, cv2.THRESH_BINARY)
+
+    mask_inv = cv2.bitwise_not(mask)
+
+    img_bg = cv2.bitwise_and(roi, roi, mask=mask_inv)
+    text_fg = cv2.bitwise_and(text_img, text_img, mask=mask)
+
+    dst = cv2.add(img_bg, text_fg)
+    img[y:y+h, x:x+w] = dst
+    return img
 
 def input_logo(img):
     global masks, logo
@@ -101,7 +129,8 @@ def main():
     cv2.setMouseCallback("main", onMouse)
     global image
     image = input_logo(image)
-    ko_img =put_ko_text("안녕하세요", 30)
+    ko_img = make_text_image("안녕하세요", 30, (255, 0, 0, 0))
+    blit(image, 120, 10, ko_img)
 
     while True:
         key = cv2.waitKeyEx(30)
