@@ -96,6 +96,10 @@ class TextSprite(Sprite):
         """색상 변경"""
         self.color = new_color
         self._create_text_image()
+    
+    def update(self):
+        self.color = ((self.color[0]+7)%256, (self.color[1]+3)%256, (self.color[2]+1)%256, 0)
+        self.set_color(self.color)
 
 class LogoSprite(Sprite):
     """로고 스프라이트 클래스"""
@@ -245,6 +249,9 @@ class MainDraw:
             # 값 조절 처리
             elif key in [65362, 65364, 2621440, 2490368]:
                 self.handle_value_adjustment(key)
+            
+            # 모든 스프라이트 업데이트
+            self.update_all_sprites()
 
             # 화면 업데이트
             if key in [ord('r'), ord('g'), ord('b'), 65362, 65364, 2621440, 2490368]:
