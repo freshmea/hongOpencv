@@ -1,5 +1,3 @@
-from turtle import up
-
 import cv2
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont
@@ -110,6 +108,8 @@ def update_img(image):
     image = input_logo(image)
     ko_img = make_text_image("즐거운 OpenCV 수업!", 30, (255, 0, 0, 0))
     blit(image, 120, 10, ko_img)
+    ko_img = make_text_image("오늘은 9월 4일", 50, (0, 0, 255, 0))
+    blit(image, 120, 60, ko_img)
     image = draw_bgr_info(image)
     return image
 
