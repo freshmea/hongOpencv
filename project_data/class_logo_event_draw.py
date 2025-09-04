@@ -254,11 +254,10 @@ class MainDraw:
             self.update_all_sprites()
 
             # 화면 업데이트
-            if key in [ord('r'), ord('g'), ord('b'), 65362, 65364, 2621440, 2490368]:
-                self.update_bgr_info()
-                cloned_img = self.image.copy()
-                self.draw_all_sprites(cloned_img)
-                cv2.imshow("main", cloned_img)
+            self.update_bgr_info()
+            cloned_img = self.image.copy()
+            self.draw_all_sprites(cloned_img)
+            cv2.imshow("main", cloned_img)
 
         cv2.destroyAllWindows()
 
