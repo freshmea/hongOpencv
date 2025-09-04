@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 from textSprite import TextSprite
 from logoSprite import LogoSprite
+from imageSprite import ImageSprite
 
 class MainDraw:
     def __init__(self, screen_width=800, screen_height=600):
@@ -30,6 +31,10 @@ class MainDraw:
         # BGR 정보 텍스트 스프라이트
         self.bgr_info_sprite = TextSprite(10, self.screen_height-60, "", 20, (255, 255, 255, 0))
         self.sprites.append(self.bgr_info_sprite)
+
+        # 이미지 스프라이트 생성
+        self.image_sprite = ImageSprite(120, 60, "data/lenna.bmp", (400, 500))
+        self.sprites.append(self.image_sprite)
 
     def update_bgr_info(self):
         """BGR 정보 텍스트 업데이트"""

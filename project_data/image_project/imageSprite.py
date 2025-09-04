@@ -15,8 +15,9 @@ class ImageSprite(Sprite):
         try:
             image = cv2.imread(self.image_path, cv2.IMREAD_COLOR)
             image = cv2.resize(image, self.size)
-            image = cv2.bitwise_not(image)
             self.image = image
+            self.image = cv2.Canny(self.image, 100, 200)
+            self.image = cv2.cvtColor(self.image, cv2.COLOR_GRAY2BGR)
             self.width = self.size[0]
             self.height = self.size[1]
         except:
