@@ -3,9 +3,10 @@ import numpy as np
 from textSprite import TextSprite
 from logoSprite import LogoSprite
 from imageSprite import ImageSprite
+from videoSprite import VideoSprite
 
 class MainDraw:
-    def __init__(self, screen_width=800, screen_height=600):
+    def __init__(self, screen_width=1200, screen_height=800):
         self.screen_width = screen_width
         self.screen_height = screen_height
         self.canvas = np.zeros((screen_width, screen_height, 3), np.uint8)
@@ -33,8 +34,12 @@ class MainDraw:
         self.sprites.append(self.bgr_info_sprite)
 
         # 이미지 스프라이트 생성
-        self.image_sprite = ImageSprite(120, 60, "data/lenna.bmp", (400, 500))
-        self.sprites.append(self.image_sprite)
+        # self.image_sprite = ImageSprite(120, 60, "data/lenna.bmp", (400, 500))
+        # self.sprites.append(self.image_sprite)
+
+        # 비디오 스프라이트 생성
+        self.video_sprite = VideoSprite(120, 60, video_source=0, size=(640, 480))
+        self.sprites.append(self.video_sprite)
 
     def update_bgr_info(self):
         """BGR 정보 텍스트 업데이트"""
@@ -112,11 +117,11 @@ class MainDraw:
 
         # 초기 화면 설정
         self.update_bgr_info()
-        self.draw_all_sprites(self.canvas)
+        # self.draw_all_sprites(self.canvas)
         cv2.imshow("main", self.canvas)
 
         while True:
-            key = cv2.waitKeyEx(30)
+            key = cv2.waitKeyEx(1)
             if key == 27:  # ESC 키
                 break
 
