@@ -4,6 +4,7 @@ from textSprite import TextSprite
 from logoSprite import LogoSprite
 from imageSprite import ImageSprite
 from videoSprite import VideoSprite
+from buttonSprite import ButtonSprite
 
 class MainDraw:
     def __init__(self, screen_width=1200, screen_height=800):
@@ -41,6 +42,10 @@ class MainDraw:
         self.video_sprite = VideoSprite(120, 60, video_source=0, size=(640, 480))
         self.sprites.append(self.video_sprite)
 
+        # 버튼 스프라이트 생성
+        self.button_sprite = ButtonSprite(450, 10, width=100, height=50, text="클릭")
+        self.sprites.append(self.button_sprite)
+
     def update_bgr_info(self):
         """BGR 정보 텍스트 업데이트"""
         info_text = f"B:{self.bgr_values[0]} G:{self.bgr_values[1]} R:{self.bgr_values[2]}"
@@ -72,6 +77,14 @@ class MainDraw:
             if not self.mouse_on:
                 self.mouse_position = (x, y)
             self.mouse_on = True
+            # 버튼의 위치 와 마우스 위치를 비교하여 클릭 여부 판단
+            if self.button_sprite.x <= x <= self.button_sprite.x + self.button_sprite.width and \
+               self.button_sprite.y <= y <= self.button_sprite.y + self.button_sprite.height:
+                cv2.rectangle(clone_img, (self.button_sprite.x, self.button_sprite.y), 
+                              (self.button_sprite.x + self.button_sprite.width, self.button_sprite.y + self.button_sprite.height), 
+                              (0, 0, 255), -1)
+                if cv2.EVENT_FLAG_LBUTTON:
+                    print("버튼 클릭됨!")
         elif event == cv2.EVENT_LBUTTONUP:
             cv2.line(self.canvas, self.mouse_position, (x, y), (255, 255, 255), 2)
             self.mouse_on = False
