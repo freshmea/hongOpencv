@@ -31,6 +31,14 @@
 
 ## 2025_9_4
 
-- 1교시 : 객체 지향 적용 class 만들기
-- 2교시 : 계측적 구조화 실습 sprite 만들기
+- 1교시 : 객체 지향 적용 class 작성
+- 2교시 : 계측적 구조화 실습 sprite 작성
+- 3교시 : 색공간 실습 hsv 적용, inRange 마스크 를 통한 색상 영역 검출
+- 4교시 : convolution 필터링, blurr, canny 엣지 검출
 
+## 2025_9_5
+
+- 1교시 : 비디오 sprite 작성, Canny 엣지 적용
+- 2교시 : 버튼 sprite 작성
+- 3교시 : orb matcher 실습
+- 4교시 : cuda 및 pytorch 설정, yolo 11n 모델 실습
