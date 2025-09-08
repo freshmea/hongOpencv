@@ -216,5 +216,8 @@ class VideoSprite(Sprite):
                 ret, self.image = self.cap.read()
                 if ret:
                     self.image = self.orb_matcher(self.image)
+            # affine 모드
+            elif self.mode == 5:
+                self.image = np.zeros((*self.size, 3), np.uint8)
         except:
             pass

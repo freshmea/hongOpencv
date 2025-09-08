@@ -1,6 +1,7 @@
-from sprite import Sprite
 import cv2
 import numpy as np
+from sprite import Sprite
+
 
 class ImageSprite(Sprite):
     """이미지 스프라이트 클래스"""
@@ -9,27 +10,19 @@ class ImageSprite(Sprite):
         self.image_path = image_path
         self.size = size
         self._load_image()
+        self.mode = 0
+        self.image_points = []  # 이미지의 topleft, topright, bottomleft 좌표 저장
+        self.image_points.append((self.x, self.y))  # topleft
+        self.image_points.append((self.x + self.size[0], self.y))  # topright
+        self.image_points.append((self.x, self.y + self.size[1]))  # bottomleft
+        self.point_index = 0
 
     def _load_image(self):
         """이미지 로드 및 전처리"""
-        try:
-            image = cv2.imread(self.image_path, cv2.IMREAD_COLOR)
-            image = cv2.resize(image, self.size)
-            self.image = image
-            self.image = cv2.Canny(self.image, 100, 200)
-            self.image = cv2.cvtColor(self.image, cv2.COLOR_GRAY2BGR)
-            self.width = self.size[0]
-            self.height = self.size[1]
-        except:
-            # 이미지 파일이 없으면 기본 이미지 생성
-            self.image = np.ones((*self.size, 3), np.uint8) * 128
-            self.width = self.size[0]
-            self.height = self.size[1]
-            logo = cv2.resize(logo, self.size)
-            logo = cv2.bitwise_not(logo)
-            self.image = logo
-            self.width = self.size[0]
-            self.height = self.size[1]
+        image = cv2.imread(self.image_path, cv2.IMREAD_COLOR)
+        image = cv2.resize(image, self.size)
+        self.image = image
+
 
     def reload_image(self, new_path=None):
         """이미지 다시 로드"""
@@ -37,9 +30,48 @@ class ImageSprite(Sprite):
             self.image_path = new_path
         self._load_image()
 
+    def check_mouse_position(self, mouse_x, mouse_y):
+        # topleft, topright, bottomleft 에 있는지 확인 +- 10 픽셀 범위
+        # topleft
+        if (self.image_points[0][0] - 10 <= mouse_x <= self.image_points[0][0] + 10 and
+                self.image_points[0][1] - 10 <= mouse_y <= self.image_points[0][1] + 10):
+            self.point_index = 0
+            return True
+        # topright
+        if (self.image_points[1][0] - 10 <= mouse_x <= self.image_points[1][0] + 10 and
+                self.image_points[1][1] - 10 <= mouse_y <= self.image_points[1][1] + 10):
+            self.point_index = 1
+            return True
+        # bottomleft
+        if (self.image_points[2][0] - 10 <= mouse_x <= self.image_points[2][0] + 10 and
+                self.image_points[2][1] - 10 <= mouse_y <= self.image_points[2][1] + 10):
+            self.point_index = 2
+            return True
+        return False
+
+    def warpAffine(self, x, y):
+        dst_points =  self.image_points.copy()
+        dst_points[self.point_index] = (x, y)
+        M = cv2.getAffineTransform(np.float32(self.image_points), np.float32(dst_points))
+        self.image = cv2.warpAffine(self.image, M, self.size)
+        self.image_points = dst_points
+
     def draw(self, target_img):
         if self.image is not None:
             self._blit(target_img, self.x, self.y, self.image)
 
     def update(self):
-        pass
+        if self.mode == 0:
+            self.image = np.zeros((*self.size, 3), np.uint8)
+        if self.mode == 1:
+            self.image = np.zeros((*self.size, 3), np.uint8)
+        if self.mode == 2:
+            self.image = np.zeros((*self.size, 3), np.uint8)
+        if self.mode == 3:
+            self.image = np.zeros((*self.size, 3), np.uint8)
+        if self.mode == 4:
+            self.image = np.zeros((*self.size, 3), np.uint8)
+        if self.mode == 5:
+            if self.change_mode:
+                self._load_image()
+            self.change_mode = False
