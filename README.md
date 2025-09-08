@@ -42,3 +42,10 @@
 - 2교시 : 버튼 sprite 작성
 - 3교시 : orb matcher 실습
 - 4교시 : cuda 및 pytorch 설정, yolo 11n 모델 실습
+
+## 2025_9_8
+
+- 1교시 : slideSprite 작성
+- 2교시 : yolo 및 orb matcher 적용 - 프로젝트
+- 3교시 :
+-

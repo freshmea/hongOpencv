@@ -128,7 +128,7 @@ class MainDraw:
                 self.dragging_slider.stop_drag()
                 self.dragging_slider = None
             elif self.mouse_on:
-                cv2.line(self.canvas, self.mouse_position, (x, y), (255, 255, 255), 2)
+                # cv2.line(self.canvas, self.mouse_position, (x, y), (255, 255, 255), 2)
                 self.mouse_on = False
 
         self.draw_all_sprites(clone_img)

@@ -1,17 +1,21 @@
 import cv2
 import numpy as np
+import torch
 from sprite import Sprite
+from ultralytics import YOLO
 
 
 class VideoSprite(Sprite):
     """비디오 스프라이트 클래스"""
-    def __init__(self, x, y, video_source=0, size=(640, 480)):
+    def __init__(self, x, y, video_source=0, size=(640, 480), ref_image = "data/realsense.jpg"):
         super().__init__(x, y)
         self.video_source = video_source
         self.size = size
         self.cap = None
         self._load_image()
         self.mode = 0
+        self.image = None
+        self.ref_image_name = ref_image
 
     def _load_image(self):
         """이미지 로드 및 전처리"""
@@ -44,9 +48,6 @@ class VideoSprite(Sprite):
         self._load_image()
 
     def yolo_process(self, frame):
-        import torch
-        from ultralytics import YOLO
-
         if not hasattr(self, 'yolo_model'):
             print("Device:", "cuda" if torch.cuda.is_available() else "cpu")
             self.yolo_model = YOLO("yolo11n.pt")
@@ -61,7 +62,7 @@ class VideoSprite(Sprite):
         if not hasattr(self, 'orb'):
             self.orb = cv2.ORB_create()
             self.bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
-            self.ref_image = cv2.imread('data/realsense.jpg')
+            self.ref_image = cv2.imread(self.ref_image_name)
             if self.ref_image is None:
                 # 기본 참조 이미지가 없으면 빈 프레임 반환
                 return frame
