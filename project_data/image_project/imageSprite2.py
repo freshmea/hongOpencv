@@ -3,7 +3,7 @@ import numpy as np
 from sprite import Sprite
 
 
-class ImageSprite(Sprite):
+class ImageSprite2(Sprite):
     """이미지 스프라이트 클래스"""
     def __init__(self, x, y, image_path="data/lenna.bmp", size=(100, 100)):
         super().__init__(x, y)
@@ -17,10 +17,11 @@ class ImageSprite(Sprite):
         image = cv2.imread(self.image_path, cv2.IMREAD_COLOR)
         image = cv2.resize(image, self.size)
         self.image = image
-        self.image_points = []  # 이미지의 topleft, topright, bottomleft 좌표 저장
+        self.image_points = []  # 이미지의 topleft, topright, bottomleft, bottomright 좌표 저장
         self.image_points.append((self.x, self.y))  # topleft
         self.image_points.append((self.x + self.size[0], self.y))  # topright
         self.image_points.append((self.x, self.y + self.size[1]))  # bottomleft
+        self.image_points.append((self.x + self.size[0], self.y + self.size[1]))  # bottomright
         self.point_index = 0
 
 
@@ -47,13 +48,18 @@ class ImageSprite(Sprite):
                 self.image_points[2][1] - 10 <= mouse_y <= self.image_points[2][1] + 10):
             self.point_index = 2
             return True
+        # bottomright
+        if (self.image_points[3][0] - 10 <= mouse_x <= self.image_points[3][0] + 10 and
+                self.image_points[3][1] - 10 <= mouse_y <= self.image_points[3][1] + 10):
+            self.point_index = 3
+            return True
         return False
 
-    def warpAffine(self, x, y):
+    def warpPerspective(self, x, y):
         dst_points =  self.image_points.copy()
         dst_points[self.point_index] = (x, y)
-        M = cv2.getAffineTransform(np.float32(self.image_points), np.float32(dst_points))
-        self.image = cv2.warpAffine(self.image, M, self.size)
+        M = cv2.getPerspectiveTransform(np.float32(self.image_points), np.float32(dst_points))
+        self.image = cv2.warpPerspective(self.image, M, self.size)
         # 좌표 업데이트
         self.image_points = dst_points
         # 이미지에 새로운 좌표에 대한 노란 원 그리기
@@ -77,8 +83,8 @@ class ImageSprite(Sprite):
         if self.mode == 4:
             self.image = np.zeros((*self.size, 3), np.uint8)
         if self.mode == 5:
+            self.image = np.zeros((*self.size, 3), np.uint8)
+        if self.mode == 6:
             if self.change_mode:
                 self._load_image()
             self.change_mode = False
-        if self.mode == 6:
-            self.image = np.zeros((*self.size, 3), np.uint8)

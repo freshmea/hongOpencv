@@ -34,7 +34,7 @@ class ButtonSprite(Sprite):
 
     def click(self):
         self.mode += 1
-        self.mode = self.mode % 6
+        self.mode = self.mode % 7
         if self.mode == 0:
             self.text_sprite.set_text("캐니")
         elif self.mode == 1:
@@ -47,6 +47,8 @@ class ButtonSprite(Sprite):
             self.text_sprite.set_text("ORB 매처")
         elif self.mode == 5:
             self.text_sprite.set_text("affine 모드")
+        elif self.mode == 6:
+            self.text_sprite.set_text("perspective 모드")
         self.image = self.text_sprite.image
         return self.mode
 

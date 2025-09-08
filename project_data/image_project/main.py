@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 from buttonSprite import ButtonSprite
 from imageSprite import ImageSprite
+from imageSprite2 import ImageSprite2
 from logoSprite import LogoSprite
 from slideSprite import SlideSprite
 from textSprite import TextSprite
@@ -41,6 +42,10 @@ class MainDraw:
         # 이미지 스프라이트 생성
         self.image_sprite = ImageSprite(120, 60, "data/lenna.bmp", (640, 480))
         self.sprites.append(self.image_sprite)
+
+        # 이미지 스프라이트2 생성
+        self.image_sprite2 = ImageSprite2(120, 60, "data/lenna.bmp", (640, 480))
+        self.sprites.append(self.image_sprite2)
 
         # 비디오 스프라이트 생성
         self.video_sprite = VideoSprite(120, 60, video_source=4, size=(640, 480))
@@ -109,6 +114,13 @@ class MainDraw:
                                   (self.image_sprite.x + self.image_sprite.size[0]+10, self.image_sprite.y + self.image_sprite.size[1]+10),
                                   (0, 255, 255), 2)
 
+            # ImageSprite2 드래그 처리 이미지의 topleft, topright, bottomLeft 일 때만 드래그모드
+            if self.image_sprite2.mode == 6:
+                if self.image_sprite2.check_mouse_position(x, y):
+                    cv2.rectangle(clone_img, (self.image_sprite2.x-10, self.image_sprite2.y-10),
+                                  (self.image_sprite2.x + self.image_sprite2.size[0]+10, self.image_sprite2.y + self.image_sprite2.size[1]+10),
+                                  (0, 255, 255), 2)
+
 
         elif event == cv2.EVENT_LBUTTONDOWN:
             # 슬라이더 클릭 확인
@@ -125,6 +137,11 @@ class MainDraw:
                 cv2.circle(clone_img, (x, y), 10, (0, 0, 255), -1)
                 self.dragging_image_sprite = True
 
+            # ImageSprite2 클릭 확인
+            if self.image_sprite2.mode == 6 and self.image_sprite2.check_mouse_position(x, y):
+                cv2.circle(clone_img, (x, y), 10, (0, 0, 255), -1)
+                self.dragging_image_sprite = True
+
             if not slider_clicked:
                 if not self.mouse_on:
                     self.mouse_position = (x, y)
@@ -136,7 +153,9 @@ class MainDraw:
                     if cv2.EVENT_FLAG_LBUTTON:
                         self.video_sprite.mode = self.button_sprite.click()
                         self.image_sprite.change_mode = True
+                        self.image_sprite2.change_mode = True
                         self.image_sprite.mode = self.button_sprite.mode
+                        self.image_sprite2.mode = self.button_sprite.mode
 
         elif event == cv2.EVENT_LBUTTONUP:
             # 슬라이더 드래그 종료
@@ -147,6 +166,10 @@ class MainDraw:
             elif self.image_sprite.mode == 5 and self.dragging_image_sprite:
                 self.dragging_image_sprite = False
                 self.image_sprite.warpAffine(x, y)
+            # 이미지 스프라이트2 드래그 종료
+            elif self.image_sprite2.mode == 6 and self.dragging_image_sprite:
+                self.dragging_image_sprite = False
+                self.image_sprite2.warpPerspective(x, y)
 
             elif self.mouse_on:
                 # cv2.line(self.canvas, self.mouse_position, (x, y), (255, 255, 255), 2)

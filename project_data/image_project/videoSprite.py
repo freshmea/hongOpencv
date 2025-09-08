@@ -219,5 +219,8 @@ class VideoSprite(Sprite):
             # affine 모드
             elif self.mode == 5:
                 self.image = np.zeros((*self.size, 3), np.uint8)
+            # perspective 모드
+            elif self.mode == 6:
+                self.image = np.zeros((*self.size, 3), np.uint8)
         except:
             pass
