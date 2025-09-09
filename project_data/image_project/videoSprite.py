@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 import torch
+from mediapipe import GestureClassification, MPHandPose, MPPalmDet, visualize
 from sprite import Sprite
 from ultralytics import YOLO
 
@@ -188,6 +189,42 @@ class VideoSprite(Sprite):
 
         return True
 
+    def mp_hand_pose_process(self, frame):
+        palm_detector = MPPalmDet(modelPath='data/palm_detection_mediapipe_2023feb.onnx',
+                              nmsThreshold=0.3,
+                              scoreThreshold=0.6,
+                            #   backendId=cv2.dnn.DNN_BACKEND_CUDA,
+                              backendId=cv2.dnn.DNN_BACKEND_OPENCV,
+                            #   targetId=cv2.dnn.DNN_TARGET_CUDA)
+                              targetId=cv2.dnn.DNN_TARGET_CPU)
+    # handpose detector
+        handpose_detector = MPHandPose(modelPath="data/handpose_estimation_mediapipe_2023feb.onnx",
+                                   confThreshold=0.9,
+                                   backendId=cv2.dnn.DNN_BACKEND_OPENCV,
+                                   targetId=cv2.dnn.DNN_TARGET_CPU)
+                                    #   backendId=cv2.dnn.DNN_BACKEND_CUDA,
+                                    #   targetId=cv2.dnn.DNN_TARGET_CUDA)
+        print(palm_detector, handpose_detector)
+        # Palm detector inference
+        palms = palm_detector.infer(frame)
+        hands = np.empty(shape=(0, 132))
+
+        # Estimate the pose of each hand
+        for palm in palms:
+            # Handpose detector inference
+            handpose = handpose_detector.infer(frame, palm)
+            if handpose is not None:
+                hands = np.vstack((hands, handpose))
+        # Draw results on the input image
+        frame, view_3d = visualize(frame, hands)
+        if len(palms) == 0:
+                print('No palm detected!')
+        else:
+            print('Palm detected!')
+        # cv2.imshow("Hand Pose", frame)
+        # cv2.imshow("Hand Pose 3D", view_3d)
+        return frame
+
     def draw(self, target_img):
         if self.image is not None:
             self._blit(target_img, self.x, self.y, self.image)
@@ -250,8 +287,9 @@ class VideoSprite(Sprite):
     def _handle_hand_pose(self):
         """핸드포즈 모드 처리"""
         ret, self.image = self.cap.read()
+        print("hand pose mode")
         if ret:
-            pass
+            self.image = self.mp_hand_pose_process(self.image)
 
     def _handle_default_mode(self):
         """기본 모드 처리 (알 수 없는 모드)"""
