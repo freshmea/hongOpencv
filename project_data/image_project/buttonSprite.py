@@ -17,6 +17,7 @@ class ButtonSprite(Sprite):
         self.image = np.zeros((height, width, 3), np.uint8)
         self._create_button_image()
         self.mode = 0
+        self.mode_texts = list()
 
     def _create_button_image(self):
         self.text_sprite = TextSprite(0, 0, self.text, font_size=int(self.font_scale * 30), color=self.text_color)
@@ -34,9 +35,8 @@ class ButtonSprite(Sprite):
 
     def click(self):
         self.mode += 1
-        self.mode = self.mode % 7
-        mode_texts = ["캐니", "정상", "블러", "욜로", "ORB 매처", "affine 모드", "perspective 모드"]
-        self.text_sprite.set_text(mode_texts[self.mode])
+        self.mode = self.mode % len(self.mode_texts)
+        self.text_sprite.set_text(self.mode_texts[self.mode])
         self.image = self.text_sprite.image
         self.image = cv2.resize(self.image, (self.width, self.height))
         cv2.rectangle(self.image, (0, 0), (self.width-1, self.height-1), (255, 255, 255), 2)

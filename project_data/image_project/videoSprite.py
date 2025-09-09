@@ -11,7 +11,7 @@ class VideoSprite(Sprite):
         super().__init__(x, y)
         self.video_source = video_source
         self.size = size
-        self.active_modes = active_modes or [0, 1, 2, 3, 4]  # 기본값: 비디오 관련 모드들
+        self.active_modes = active_modes or [0, 1, 2, 3, 4, 7]  # 기본값: 비디오 관련 모드들
         self.cap = None
         self._load_image()
         self.mode = 0
@@ -209,6 +209,7 @@ class VideoSprite(Sprite):
                 2: self._handle_blur_mode,       # 블러
                 3: self._handle_yolo_mode,       # 욜로
                 4: self._handle_orb_mode,        # ORB 매처
+                7: self._handle_hand_pose,       # 핸드포즈
             }
 
             # 해당 모드의 핸들러가 있으면 실행, 없으면 기본 처리
@@ -245,6 +246,12 @@ class VideoSprite(Sprite):
         ret, self.image = self.cap.read()
         if ret:
             self.image = self.orb_matcher(self.image)
+
+    def _handle_hand_pose(self):
+        """핸드포즈 모드 처리"""
+        ret, self.image = self.cap.read()
+        if ret:
+            pass
 
     def _handle_default_mode(self):
         """기본 모드 처리 (알 수 없는 모드)"""
