@@ -49,3 +49,10 @@
 - 2교시 : Transform 설명
 - 3교시 : affine Transform 실습 - 프로젝트
 - 4교시 : perspective Transform 실습 - 프로젝트
+
+## 2025_9_9
+
+- 1교시 : yolo2 - results 결과 응용 하기, 클래스 이름 얻기, bbox 좌표 얻기
+- 2교시 :
+- 3교시 :
+- 4교시 :
