@@ -45,7 +45,7 @@
 
 ## 2025_9_8
 
-- 1교시 : slideSprite 작성
-- 2교시 : yolo 및 orb matcher 적용 - 프로젝트
-- 3교시 :
--
+- 1교시 : slideSprite 작성, 슬라이더 실습, 버튼 sprite 개선
+- 2교시 : Transform 설명
+- 3교시 : affine Transform 실습 - 프로젝트
+- 4교시 : perspective Transform 실습 - 프로젝트
