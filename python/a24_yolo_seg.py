@@ -71,7 +71,8 @@ def main():
                 # morphology 처리로 마스크 영상 열기 (침식 후 팽창)
                 # mask = cv2.morphologyEx(mask.astype(np.uint8), cv2.MORPH_OPEN, kernel, iterations=3).astype(bool)
                 # morphology 처리로 마스크 영상 닫기 (팽창 후 침식)
-                # mask = cv2.morphologyEx(mask.astype(np.uint8), cv2.MORPH_CLOSE, kernel, iterations=1).astype(bool)
+                mask = cv2.morphologyEx(mask.astype(np.uint8), cv2.MORPH_RECT, kernel, iterations=1).astype(bool)
+
                 yellow = np.full_like(frame, (0, 255, 255))
                 frame = np.where(mask[:, :, None], np.clip(frame * 0.4 + yellow * 0.8, 0, 255).astype(np.uint8), frame)
 
