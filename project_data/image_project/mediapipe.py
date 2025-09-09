@@ -1,5 +1,8 @@
 import cv2 as cv
 import numpy as np
+from utils_ort import make_ort_session
+
+# pip install onnxruntime-gpu
 
 
 class MPHandPose:
@@ -20,19 +23,24 @@ class MPHandPose:
         self.HAND_BOX_SHIFT_VECTOR = [0, -0.1]
         self.HAND_BOX_ENLARGE_FACTOR = 1.65
 
-        self.model = cv.dnn.readNet(self.model_path)
-        self.model.setPreferableBackend(self.backend_id)
-        self.model.setPreferableTarget(self.target_id)
+        # self.model = cv.dnn.readNet(self.model_path)
+        # self.model.setPreferableBackend(self.backend_id)
+        # self.model.setPreferableTarget(self.target_id)
+
+        # === ORT 세션 ===
+        self.sess, self.input_name, self.output_names, self.is_nchw = make_ort_session(self.model_path)
+
 
     @property
     def name(self):
         return self.__class__.__name__
 
     def setBackendAndTarget(self, backendId, targetId):
-        self.backend_id = backendId
-        self.target_id = targetId
-        self.model.setPreferableBackend(self.backend_id)
-        self.model.setPreferableTarget(self.target_id)
+        # self.backend_id = backendId
+        # self.target_id = targetId
+        # self.model.setPreferableBackend(self.backend_id)
+        # self.model.setPreferableTarget(self.target_id)
+        pass
 
     def _cropAndPadFromPalm(self, image, palm_bbox, for_rotation = False):
         # shift bounding box
@@ -131,13 +139,17 @@ class MPHandPose:
     def infer(self, image, palm):
         # Preprocess
         input_blob, rotated_palm_bbox, angle, rotation_matrix, pad_bias = self._preprocess(image, palm)
-
+        # NHWC→NCHW 변환 필요 시
+        if self.is_nchw:
+            input_blob = np.transpose(input_blob, (0, 3, 1, 2))
         # Forward
-        self.model.setInput(input_blob)
-        output_blob = self.model.forward(self.model.getUnconnectedOutLayersNames())
+        # self.model.setInput(input_blob)
+        # output_blob = self.model.forward(self.model.getUnconnectedOutLayersNames())
 
+        # === ORT Forward ===
+        outs = self.sess.run(self.output_names, {self.input_name: input_blob})
         # Postprocess
-        results = self._postprocess(output_blob, rotated_palm_bbox, angle, rotation_matrix, pad_bias)
+        results = self._postprocess(outs, rotated_palm_bbox, angle, rotation_matrix, pad_bias)
         return results # [bbox_coords, landmarks_coords, conf]
 
     def _postprocess(self, blob, rotated_palm_bbox, angle, rotation_matrix, pad_bias):
@@ -211,9 +223,12 @@ class MPPalmDet:
 
         self.input_size = np.array([192, 192]) # wh
 
-        self.model = cv.dnn.readNet(self.model_path)
-        self.model.setPreferableBackend(self.backend_id)
-        self.model.setPreferableTarget(self.target_id)
+        # self.model = cv.dnn.readNet(self.model_path)
+        # self.model.setPreferableBackend(self.backend_id)
+        # self.model.setPreferableTarget(self.target_id)
+
+        # === ORT 세션 ===
+        self.sess, self.input_name, self.output_names, self.is_nchw = make_ort_session(self.model_path)
 
         self.anchors = self._load_anchors()
 
@@ -222,10 +237,11 @@ class MPPalmDet:
         return self.__class__.__name__
 
     def setBackendAndTarget(self, backendId, targetId):
-        self.backend_id = backendId
-        self.target_id = targetId
-        self.model.setPreferableBackend(self.backend_id)
-        self.model.setPreferableTarget(self.target_id)
+        # self.backend_id = backendId
+        # self.target_id = targetId
+        # self.model.setPreferableBackend(self.backend_id)
+        # self.model.setPreferableTarget(self.target_id)
+        pass
 
     def _preprocess(self, image):
         pad_bias = np.array([0., 0.]) # left, top
@@ -244,7 +260,11 @@ class MPPalmDet:
         image = cv.cvtColor(image, cv.COLOR_BGR2RGB)
         image = image.astype(np.float32) / 255.0 # norm
         pad_bias = (pad_bias / ratio).astype(np.int32)
-        return image[np.newaxis, :, :, :], pad_bias # hwc -> nhwc
+        # return image[np.newaxis, :, :, :], pad_bias # hwc -> nhwc
+        blob = image[np.newaxis, :, :, :]  # NHWC
+        if self.is_nchw:
+            blob = np.transpose(blob, (0, 3, 1, 2))  # NCHW
+        return blob, pad_bias
 
     def infer(self, image):
         h, w, _ = image.shape
@@ -253,11 +273,14 @@ class MPPalmDet:
         input_blob, pad_bias = self._preprocess(image)
 
         # Forward
-        self.model.setInput(input_blob)
-        output_blob = self.model.forward(self.model.getUnconnectedOutLayersNames())
+        # self.model.setInput(input_blob)
+        # output_blob = self.model.forward(self.model.getUnconnectedOutLayersNames())
+
+        # === ORT Forward ===
+        outs = self.sess.run(self.output_names, {self.input_name: input_blob})
 
         # Postprocess
-        results = self._postprocess(output_blob, np.array([w, h]), pad_bias)
+        results = self._postprocess(outs, np.array([w, h]), pad_bias)
 
         return results
 

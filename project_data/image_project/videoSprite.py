@@ -190,37 +190,40 @@ class VideoSprite(Sprite):
         return True
 
     def mp_hand_pose_process(self, frame):
-        palm_detector = MPPalmDet(modelPath='data/palm_detection_mediapipe_2023feb.onnx',
-                              nmsThreshold=0.3,
-                              scoreThreshold=0.6,
-                            #   backendId=cv2.dnn.DNN_BACKEND_CUDA,
-                              backendId=cv2.dnn.DNN_BACKEND_OPENCV,
-                            #   targetId=cv2.dnn.DNN_TARGET_CUDA)
-                              targetId=cv2.dnn.DNN_TARGET_CPU)
-    # handpose detector
-        handpose_detector = MPHandPose(modelPath="data/handpose_estimation_mediapipe_2023feb.onnx",
+        # palm detector
+        if not hasattr(self, 'palm_detector'):
+            self.palm_detector = MPPalmDet(modelPath='data/palm_detection_mediapipe_2023feb.onnx',
+                                nmsThreshold=0.3,
+                                scoreThreshold=0.6,
+                                #   backendId=cv2.dnn.DNN_BACKEND_CUDA,
+                                backendId=cv2.dnn.DNN_BACKEND_OPENCV,
+                                #   targetId=cv2.dnn.DNN_TARGET_CUDA)
+                                targetId=cv2.dnn.DNN_TARGET_CPU)
+        # handpose detector
+        if not hasattr(self, 'handpose_detector'):
+            self.handpose_detector = MPHandPose(modelPath="data/handpose_estimation_mediapipe_2023feb.onnx",
                                    confThreshold=0.9,
                                    backendId=cv2.dnn.DNN_BACKEND_OPENCV,
                                    targetId=cv2.dnn.DNN_TARGET_CPU)
                                     #   backendId=cv2.dnn.DNN_BACKEND_CUDA,
                                     #   targetId=cv2.dnn.DNN_TARGET_CUDA)
-        print(palm_detector, handpose_detector)
+
         # Palm detector inference
-        palms = palm_detector.infer(frame)
+        palms = self.palm_detector.infer(frame)
         hands = np.empty(shape=(0, 132))
 
         # Estimate the pose of each hand
         for palm in palms:
             # Handpose detector inference
-            handpose = handpose_detector.infer(frame, palm)
+            handpose = self.handpose_detector.infer(frame, palm)
             if handpose is not None:
                 hands = np.vstack((hands, handpose))
         # Draw results on the input image
         frame, view_3d = visualize(frame, hands)
-        if len(palms) == 0:
-                print('No palm detected!')
-        else:
-            print('Palm detected!')
+        # if len(palms) == 0:
+        #         print('No palm detected!')
+        # else:
+        #     print('Palm detected!')
         # cv2.imshow("Hand Pose", frame)
         # cv2.imshow("Hand Pose 3D", view_3d)
         return frame
@@ -287,7 +290,6 @@ class VideoSprite(Sprite):
     def _handle_hand_pose(self):
         """핸드포즈 모드 처리"""
         ret, self.image = self.cap.read()
-        print("hand pose mode")
         if ret:
             self.image = self.mp_hand_pose_process(self.image)
 
