@@ -21,6 +21,22 @@ class MainDraw:
         self.dragging_slider = None  # 현재 드래그 중인 슬라이더
         self.dragging_image_sprite = False  # 현재 드래그 중인 이미지 스프라이트 상태
 
+        # 모드 관리
+        self.current_mode = 0
+        self.mode_names = ["캐니", "정상", "블러", "욜로", "ORB 매처", "affine 모드", "perspective 모드"]
+        self.mode_subscribers = []  # 모드 변경을 구독하는 스프라이트들
+
+        # 모드별 활성 스프라이트 정의
+        self.mode_active_sprites = {
+            0: ['video'],    # 캐니: 비디오만
+            1: ['video'],    # 정상: 비디오만
+            2: ['video'],    # 블러: 비디오만
+            3: ['video'],    # 욜로: 비디오만
+            4: ['video'],    # ORB 매처: 비디오만
+            5: ['image1'],   # affine 모드: 이미지1만
+            6: ['image2']    # perspective 모드: 이미지2만
+        }
+
         # 스프라이트 리스트 초기화
         self.sprites = []
         self._init_sprites()
@@ -67,6 +83,26 @@ class MainDraw:
         self.blue_slider = SlideSprite(800, 200, width=200, height=40, min_value=0, max_value=255,
                                       value=0, label="Blue", color=(100, 50, 50))
         self.sprites.append(self.blue_slider)
+
+        # 모드 구독자 등록
+        self.subscribe_to_mode_changes(self.image_sprite)
+        self.subscribe_to_mode_changes(self.image_sprite2)
+        self.subscribe_to_mode_changes(self.video_sprite)
+
+    def subscribe_to_mode_changes(self, subscriber):
+        """모드 변경 구독자 등록"""
+        if hasattr(subscriber, 'on_mode_changed'):
+            self.mode_subscribers.append(subscriber)
+
+    def change_mode(self, new_mode):
+        """모드 변경 및 구독자들에게 알림"""
+        self.current_mode = new_mode
+        for subscriber in self.mode_subscribers:
+            subscriber.on_mode_changed(new_mode)
+
+    def get_current_mode_name(self):
+        """현재 모드 이름 반환"""
+        return self.mode_names[self.current_mode]
 
     def update_bgr_from_sliders(self):
         """슬라이더 값으로 BGR 업데이트"""
@@ -151,11 +187,8 @@ class MainDraw:
                                   (self.button_sprite.x + self.button_sprite.width, self.button_sprite.y + self.button_sprite.height),
                                   (0, 0, 255), -1)
                     if cv2.EVENT_FLAG_LBUTTON:
-                        self.video_sprite.mode = self.button_sprite.click()
-                        self.image_sprite.change_mode = True
-                        self.image_sprite2.change_mode = True
-                        self.image_sprite.mode = self.button_sprite.mode
-                        self.image_sprite2.mode = self.button_sprite.mode
+                        new_mode = self.button_sprite.click()
+                        self.change_mode(new_mode)
 
         elif event == cv2.EVENT_LBUTTONUP:
             # 슬라이더 드래그 종료

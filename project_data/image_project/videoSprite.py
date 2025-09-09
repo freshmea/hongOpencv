@@ -7,15 +7,20 @@ from ultralytics import YOLO
 
 class VideoSprite(Sprite):
     """비디오 스프라이트 클래스"""
-    def __init__(self, x, y, video_source=0, size=(640, 480), ref_image = "data/realsense.jpg"):
+    def __init__(self, x, y, video_source=0, size=(640, 480), ref_image = "data/realsense.jpg", active_modes=None):
         super().__init__(x, y)
         self.video_source = video_source
         self.size = size
+        self.active_modes = active_modes or [0, 1, 2, 3, 4]  # 기본값: 비디오 관련 모드들
         self.cap = None
         self._load_image()
         self.mode = 0
         self.image = None
         self.ref_image_name = ref_image
+
+    def on_mode_changed(self, new_mode):
+        """모드 변경 시 호출되는 콜백"""
+        self.mode = new_mode
 
     def _load_image(self):
         """이미지 로드 및 전처리"""
@@ -192,35 +197,55 @@ class VideoSprite(Sprite):
             if self.cap is None:
                 return
 
-            # 캐니
-            if self.mode == 0:
-                ret, self.image = self.cap.read()
-                if ret:
-                    self.image = cv2.Canny(self.image, 100, 200)
-                    self.image = cv2.cvtColor(self.image, cv2.COLOR_GRAY2BGR)
-            # 정상
-            elif self.mode == 1:
-                ret, self.image = self.cap.read()
-            # 블러
-            elif self.mode == 2:
-                ret, self.image = self.cap.read()
-                if ret:
-                    self.image = cv2.GaussianBlur(self.image, (15, 15), 0)
-            # 욜로
-            elif self.mode == 3:
-                ret, self.image = self.cap.read()
-                if ret:
-                    self.image = self.yolo_process(self.image)
-            # ORB 매처
-            elif self.mode == 4:
-                ret, self.image = self.cap.read()
-                if ret:
-                    self.image = self.orb_matcher(self.image)
-            # affine 모드
-            elif self.mode == 5:
+            # 활성 모드 목록에 현재 모드가 있는지 확인
+            if self.mode not in self.active_modes:
                 self.image = np.zeros((*self.size, 3), np.uint8)
-            # perspective 모드
-            elif self.mode == 6:
-                self.image = np.zeros((*self.size, 3), np.uint8)
+                return
+
+            # 모드별 처리를 딕셔너리로 관리
+            mode_handlers = {
+                0: self._handle_canny_mode,      # 캐니
+                1: self._handle_normal_mode,     # 정상
+                2: self._handle_blur_mode,       # 블러
+                3: self._handle_yolo_mode,       # 욜로
+                4: self._handle_orb_mode,        # ORB 매처
+            }
+
+            # 해당 모드의 핸들러가 있으면 실행, 없으면 기본 처리
+            handler = mode_handlers.get(self.mode, self._handle_default_mode)
+            handler()
         except:
             pass
+
+    def _handle_canny_mode(self):
+        """캐니 모드 처리"""
+        ret, self.image = self.cap.read()
+        if ret:
+            self.image = cv2.Canny(self.image, 100, 200)
+            self.image = cv2.cvtColor(self.image, cv2.COLOR_GRAY2BGR)
+
+    def _handle_normal_mode(self):
+        """정상 모드 처리"""
+        ret, self.image = self.cap.read()
+
+    def _handle_blur_mode(self):
+        """블러 모드 처리"""
+        ret, self.image = self.cap.read()
+        if ret:
+            self.image = cv2.GaussianBlur(self.image, (15, 15), 0)
+
+    def _handle_yolo_mode(self):
+        """욜로 모드 처리"""
+        ret, self.image = self.cap.read()
+        if ret:
+            self.image = self.yolo_process(self.image)
+
+    def _handle_orb_mode(self):
+        """ORB 매처 모드 처리"""
+        ret, self.image = self.cap.read()
+        if ret:
+            self.image = self.orb_matcher(self.image)
+
+    def _handle_default_mode(self):
+        """기본 모드 처리 (알 수 없는 모드)"""
+        ret, self.image = self.cap.read()

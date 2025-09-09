@@ -5,10 +5,11 @@ from sprite import Sprite
 
 class ImageSprite(Sprite):
     """이미지 스프라이트 클래스"""
-    def __init__(self, x, y, image_path="data/lenna.bmp", size=(100, 100)):
+    def __init__(self, x, y, image_path="data/lenna.bmp", size=(100, 100), active_modes=None):
         super().__init__(x, y)
         self.image_path = image_path
         self.size = size
+        self.active_modes = active_modes or [5]  # 기본값: affine 모드(5)만 활성
         self._load_image()
         self.mode = 0
 
@@ -22,6 +23,13 @@ class ImageSprite(Sprite):
         self.image_points.append((self.x + self.size[0], self.y))  # topright
         self.image_points.append((self.x, self.y + self.size[1]))  # bottomleft
         self.point_index = 0
+        self.change_mode = False
+
+    def on_mode_changed(self, new_mode):
+        """모드 변경 시 호출되는 콜백"""
+        self.mode = new_mode
+        if new_mode == 5:  # affine 모드
+            self.change_mode = True
 
 
     def reload_image(self, new_path=None):
@@ -66,19 +74,11 @@ class ImageSprite(Sprite):
             self._blit(target_img, self.x, self.y, self.image)
 
     def update(self):
-        if self.mode == 0:
-            self.image = np.zeros((*self.size, 3), np.uint8)
-        if self.mode == 1:
-            self.image = np.zeros((*self.size, 3), np.uint8)
-        if self.mode == 2:
-            self.image = np.zeros((*self.size, 3), np.uint8)
-        if self.mode == 3:
-            self.image = np.zeros((*self.size, 3), np.uint8)
-        if self.mode == 4:
-            self.image = np.zeros((*self.size, 3), np.uint8)
-        if self.mode == 5:
+        # 활성 모드 목록에 현재 모드가 있는지 확인
+        if self.mode in self.active_modes:
             if self.change_mode:
                 self._load_image()
             self.change_mode = False
-        if self.mode == 6:
+        else:
+            # 비활성 모드일 때는 검은 화면 표시
             self.image = np.zeros((*self.size, 3), np.uint8)
