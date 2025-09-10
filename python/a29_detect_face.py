@@ -14,7 +14,7 @@ def main():
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
     cap.set(cv2.CAP_PROP_FPS, 30)
     cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*"MJPG"))
-    face_cascade = cv2.CascadeClassifier("data/haarcacade_frontalface_alt2.xml")
+    face_cascade = cv2.CascadeClassifier("data/haarcascade_frontalface_alt2.xml")
     eye_cascade = cv2.CascadeClassifier("data/haarcascade_eye.xml")
     tm = cv2.TickMeter()
     while True:
