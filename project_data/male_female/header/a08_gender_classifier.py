@@ -7,6 +7,7 @@ face_cascade = cv2.CascadeClassifier("data/haarcascade_frontalface_alt2.xml")  #
 eye_cascade = cv2.CascadeClassifier("data/haarcascade_eye.xml")  # 눈 검출기
 
 no, max_no, cnt = 0, 59, 1
+
 while True:
     image, gray = preprocessing(no)                             # 전처리 수행
     if image is None:
