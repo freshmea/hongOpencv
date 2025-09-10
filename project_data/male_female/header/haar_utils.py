@@ -3,7 +3,8 @@ import numpy as np
 
 
 def preprocessing(no):
-    image = cv2.imread("data/face/%02.jpg" % no, cv2.IMREAD_COLOR)
+    print("data/face/%02d.jpg" % no)
+    image = cv2.imread("data/face/%02d.jpg" % no, cv2.IMREAD_COLOR)
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     gray = cv2.equalizeHist(gray)
     return image, gray

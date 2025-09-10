@@ -18,12 +18,12 @@ if faces.any() :
 
         rois = detect_object(face_center, faces[0])  # 머리 및 입술영역 검출
 
-        cv2.rectangle(corr_image, rois[0], (255, 0, 255), 2)
-        cv2.rectangle(corr_image, rois[1], (255, 0, 255), 2)
-        cv2.rectangle(corr_image, rois[2], (255, 0, 0), 2)
-        cv2.circle(corr_image, tuple(corr_center[0]), 5, (0, 255, 0), 2)
-        cv2.circle(corr_image, tuple(corr_center[1]), 5, (0, 255, 0), 2)
-        cv2.circle(corr_image, face_center, 3, (0, 0, 255), 2)
+        cv2.rectangle(corr_image, rois[0], (255, 0, 255), 2) # 이마 영역
+        cv2.rectangle(corr_image, rois[1], (255, 255, 255), 2) # 하관 영역
+        cv2.rectangle(corr_image, rois[2], (255, 0, 0), 2) # 입술 영역
+        cv2.circle(corr_image, tuple(corr_center[0]), 5, (0, 255, 0), 2) # 왼쪽 눈
+        cv2.circle(corr_image, tuple(corr_center[1]), 5, (0, 255, 0), 2) # 오른쪽 눈
+        cv2.circle(corr_image, face_center, 3, (0, 0, 255), 2) # 얼굴의 센터
         cv2.imshow("correct_image", corr_image)
     else:
         print("눈 미검출")
