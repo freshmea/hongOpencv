@@ -14,7 +14,9 @@ opencv_python_version = lambda str_version: tuple(map(int, (str_version.split(".
 assert opencv_python_version(cv.__version__) >= opencv_python_version("4.10.0"), \
        "Please install latest opencv-python for benchmark: python3 -m pip install --upgrade opencv-python"
 
-from yunet import YuNet
+from yunet_ort import YuNet
+
+# from yunet import YuNet
 
 # Valid combinations of backends and targets
 backend_target_pairs = [
@@ -125,6 +127,7 @@ if __name__ == '__main__':
         h = int(cap.get(cv.CAP_PROP_FRAME_HEIGHT))
         model.setInputSize([w, h])
 
+        fps_list = []
         tm = cv.TickMeter()
         while cv.waitKey(1) < 0:
             hasFrame, frame = cap.read()
@@ -136,6 +139,7 @@ if __name__ == '__main__':
             tm.start()
             results = model.infer(frame) # results is a tuple
             tm.stop()
+            fps_list.append(tm.getFPS())
 
             # Draw results on the input image
             frame = visualize(frame, results, fps=tm.getFPS())
@@ -144,3 +148,5 @@ if __name__ == '__main__':
             cv.imshow('YuNet Demo', frame)
 
             tm.reset()
+        print('Average FPS: {:.2f}'.format(np.mean(fps_list)))
+        print("Average inference time: {:.2f} ms".format(1000.0/np.mean(fps_list)))

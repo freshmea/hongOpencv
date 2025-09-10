@@ -52,7 +52,14 @@
 
 ## 2025_9_9
 
-- 1교시 : yolo2 - results 결과 응용 하기, 클래스 이름 얻기, bbox 좌표 얻기
-- 2교시 :
-- 3교시 :
-- 4교시 :
+- 1교시 : yolo - results 결과 응용 하기, 클래스 이름 얻기, bbox 좌표 얻기
+- 2교시 : yolo - segmentation 결과 응용 하기, 클래스 이름 얻기, mask 좌표 얻기
+- 3교시 : morphlogy - 열림, 닫힘, 침식, 팽창 실습
+- 4교시 : yolo - pose 결과 응용 하기, 클래스 이름 얻기, keypoint 좌표 얻기, mediapipe hand 실습
+
+## 2025_9_10
+
+- 1교시 : mediapipe 에 onnxruntime-gpu 적용
+- 2교시 : yolo - cls 결과 응용 하기, 클래스 이름 얻기, yolo - obb 실습
+- 3교시 : haar cascade 실습 - 얼굴 검출, 성별 검출 예제 실습
+- 4교시 : yunet 실습 - 얼굴 검출, 얼굴 랜드마크 예제 실습
