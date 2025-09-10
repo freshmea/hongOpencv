@@ -2,9 +2,10 @@ import argparse
 
 import cv2 as cv
 import numpy as np
-from mediapipe import MPHandPose, MPPalmDet
+from mediapipe_ort import MPHandPose, MPPalmDet
 
-# from mediapipe_ort import MPHandPose, MPPalmDet
+# from mediapipe import MPHandPose, MPPalmDet
+
 
 
 # Check OpenCV version

@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 import torch
-from mediapipe import GestureClassification, MPHandPose, MPPalmDet, visualize
+from mediapipe import MPHandPose, MPPalmDet, visualize
 from sprite import Sprite
 from ultralytics import YOLO
 
