@@ -340,29 +340,30 @@ class VideoSprite(Sprite):
                        disType=0,
                        backendId=0,
                        targetId=0)
-            img1 = cv2.imread('data/face/choi.jpg')
-            h1, w1 = img1.shape[:2]
+            self.img1 = cv2.imread('data/face/15.jpg')
+            h1, w1 = self.img1.shape[:2]
             if max(h1, w1) > 640:
                 scale = 640 / max(h1, w1)
-                img1 = cv2.resize(img1, (int(w1 * scale), int(h1 * scale)))
-            self.yunet_model2.setInputSize([img1.shape[1], img1.shape[0]])
-            self.faces1 = self.yunet_model2.infer(img1)
-            self.feature1 = self.sface_model.infer(img1, self.faces1[0][:-1])
+                self.img1 = cv2.resize(self.img1, (int(w1 * scale), int(h1 * scale)))
+            self.yunet_model2.setInputSize([self.img1.shape[1], self.img1.shape[0]])
+            self.faces1 = self.yunet_model2.infer(self.img1)
+            self.feature1 = self.sface_model.infer(self.img1, self.faces1[0][:-1])
 
         h1, w1 = frame.shape[:2]
         if max(h1, w1) > 640:
             scale = 640 / max(h1, w1)
             frame = cv2.resize(frame, (int(w1 * scale), int(h1 * scale)))
         self.yunet_model2.setInputSize([frame.shape[1], frame.shape[0]])
-        faces = self.yunet_model2.infer(frame)
-        scores = []
-        matches = []
-        for face in faces:
+        self.faces = self.yunet_model2.infer(frame)
+        self.scores = []
+        self.matches = []
+        for face in self.faces:
             self.feature2 = self.sface_model.infer(frame, face[:-1])
             cosine_score = self.sface_model._model.match(self.feature1, self.feature2, 0)
-            scores.append(cosine_score)
-            matches.append(1 if cosine_score >= self.sface_model._threshold_cosine else 0)
-        image = visualize_sface(img1, self.faces1, frame, faces, matches, scores)
+            self.scores.append(cosine_score)
+            self.matches.append(1 if cosine_score >= self.sface_model._threshold_cosine else 0)
+        image = visualize_sface(self.img1, self.faces1, frame, self.faces, self.matches, self.scores)
+        print('Scores: ', self.scores)
         return image
 
     def draw(self, target_img):
