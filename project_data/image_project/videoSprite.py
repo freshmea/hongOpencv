@@ -228,6 +228,51 @@ class VideoSprite(Sprite):
         # cv2.imshow("Hand Pose 3D", view_3d)
         return frame
 
+    def yunet_process(self, frame):
+        if not hasattr(self, 'yunet_model'):
+            from yunet_ort import YuNet
+            self.yunet_model = YuNet(modelPath='data/face_detection_yunet_2023mar.onnx',
+                  inputSize=[320, 320],
+                  confThreshold=0.9,
+                  nmsThreshold=0.3,
+                  topK=5000)
+            h, w, _ = frame.shape
+            print("Set input size:", w, h)
+        # Inference
+        self.yunet_model.setInputSize([w, h])
+        results = self.yunet_model.infer(frame)
+
+        def visualize(image, results, box_color=(0, 255, 0), text_color=(0, 0, 255), fps=None):
+            output = image.copy()
+            landmark_color = [
+                (255,   0,   0), # right eye
+                (  0,   0, 255), # left eye
+                (  0, 255,   0), # nose tip
+                (255,   0, 255), # right mouth corner
+                (  0, 255, 255)  # left mouth corner
+            ]
+
+            if fps is not None:
+                cv.putText(output, 'FPS: {:.2f}'.format(fps), (0, 15), cv.FONT_HERSHEY_SIMPLEX, 0.5, text_color)
+
+            for det in results:
+                bbox = det[0:4].astype(np.int32)
+                cv.rectangle(output, (bbox[0], bbox[1]), (bbox[0]+bbox[2], bbox[1]+bbox[3]), box_color, 2)
+
+                conf = det[-1]
+                cv.putText(output, '{:.4f}'.format(conf), (bbox[0], bbox[1]+12), cv.FONT_HERSHEY_DUPLEX, 0.5, text_color)
+
+                landmarks = det[4:14].astype(np.int32).reshape((5,2))
+                for idx, landmark in enumerate(landmarks):
+                    cv.circle(output, landmark, 2, landmark_color[idx], 2)
+
+            return output
+
+        # Draw results on the input image
+        frame = visualize(frame, results)
+
+        return frame
+
     def draw(self, target_img):
         if self.image is not None:
             self._blit(target_img, self.x, self.y, self.image)
@@ -250,6 +295,7 @@ class VideoSprite(Sprite):
                 3: self._handle_yolo_mode,       # 욜로
                 4: self._handle_orb_mode,        # ORB 매처
                 7: self._handle_hand_pose,       # 핸드포즈
+                8: self._handle_yunet_mode       # yunet 얼굴인식
             }
 
             # 해당 모드의 핸들러가 있으면 실행, 없으면 기본 처리
@@ -292,6 +338,13 @@ class VideoSprite(Sprite):
         ret, self.image = self.cap.read()
         if ret:
             self.image = self.mp_hand_pose_process(self.image)
+
+    def _handle_yunet_mode(self):
+        """yunet 얼굴인식 모드 처리"""
+        ret, self.image = self.cap.read()
+        if ret:
+            self.image = self.yunet_process(self.image)
+
 
     def _handle_default_mode(self):
         """기본 모드 처리 (알 수 없는 모드)"""

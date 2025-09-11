@@ -109,9 +109,9 @@ if __name__ == '__main__':
     # 'yunet_ort_optimized.py' 파일이 같은 디렉토리에 있다고 가정합니다.
     # 실제 환경에 맞게 경로를 수정해야 할 수 있습니다.
     try:
-        from yunet_ort_optimized import YuNet
+        from yunet_ort import YuNet
     except ImportError:
-        print("오류: 'yunet_ort_optimized.py'를 찾을 수 없습니다.")
+        print("오류: 'yunet_ort.py'를 찾을 수 없습니다.")
         print("YuNet과 SFaceORT 파일을 같은 디렉토리에 위치시켜 주세요.")
         exit()
 
