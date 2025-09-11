@@ -20,6 +20,7 @@ class MainDraw:
         self.bgr_values = [0, 0, 0]  # [B, G, R]
         self.dragging_slider = None  # 현재 드래그 중인 슬라이더
         self.dragging_image_sprite = False  # 현재 드래그 중인 이미지 스프라이트 상태
+        self.is_activated = False
 
         # 모드 관리
         self.current_mode = 0
@@ -71,9 +72,11 @@ class MainDraw:
         self.sprites.append(self.video_sprite)
 
         # 버튼 스프라이트 생성
-        self.button_sprite = ButtonSprite(450, 10, width=100, height=50, text="클릭")
+        self.button_sprite = ButtonSprite(450, 10, width=100, height=50, text="캐니")
+        self.button_sprite2 = ButtonSprite(560, 10, width=100, height=50, text="활성화")
         self.button_sprite.mode_texts = self.mode_names
         self.sprites.append(self.button_sprite)
+        self.sprites.append(self.button_sprite2)
 
         # RGB 슬라이더 생성
         self.red_slider = SlideSprite(800, 100, width=200, height=40, min_value=0, max_value=255,
@@ -186,13 +189,25 @@ class MainDraw:
                 if not self.mouse_on:
                     self.mouse_position = (x, y)
                 self.mouse_on = True
-                if self.button_sprite.check_mouse_position(x, y):
-                    cv2.rectangle(clone_img, (self.button_sprite.x, self.button_sprite.y),
-                                  (self.button_sprite.x + self.button_sprite.width, self.button_sprite.y + self.button_sprite.height),
-                                  (0, 0, 255), -1)
-                    if cv2.EVENT_FLAG_LBUTTON:
-                        new_mode = self.button_sprite.click()
-                        self.change_mode(new_mode)
+
+            # 버튼 클릭 확인
+            if self.button_sprite.check_mouse_position(x, y):
+                cv2.rectangle(clone_img, (self.button_sprite.x, self.button_sprite.y),
+                                (self.button_sprite.x + self.button_sprite.width, self.button_sprite.y + self.button_sprite.height),
+                                (0, 0, 255), -1)
+                if cv2.EVENT_FLAG_LBUTTON:
+                    new_mode = self.button_sprite.click()
+                    self.change_mode(new_mode)
+
+            # 버튼2 클릭 확인
+            if self.button_sprite2.check_mouse_position(x, y):
+                cv2.rectangle(clone_img, (self.button_sprite2.x, self.button_sprite2.y),
+                                (self.button_sprite2.x + self.button_sprite2.width, self.button_sprite2.y + self.button_sprite2.height),
+                                (0, 0, 255), -1)
+                if cv2.EVENT_FLAG_LBUTTON:
+                    self.is_activated = not self.is_activated
+                    print(self.is_activated)
+
 
         elif event == cv2.EVENT_LBUTTONUP:
             # 슬라이더 드래그 종료
@@ -276,7 +291,8 @@ class MainDraw:
                 self.handle_value_adjustment(key)
 
             # 모든 스프라이트 업데이트
-            self.update_all_sprites()
+            if self.is_activated:
+                self.update_all_sprites()
 
             # 화면 업데이트
             self.update_bgr_info()
