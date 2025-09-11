@@ -12,7 +12,7 @@ class VideoSprite(Sprite):
         super().__init__(x, y)
         self.video_source = video_source
         self.size = size
-        self.active_modes = active_modes or [0, 1, 2, 3, 4, 7]  # 기본값: 비디오 관련 모드들
+        self.active_modes = active_modes or [0, 1, 2, 3, 4, 7, 8]  # 기본값: 비디오 관련 모드들
         self.cap = None
         self._load_image()
         self.mode = 0
