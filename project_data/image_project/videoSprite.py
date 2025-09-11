@@ -6,6 +6,32 @@ from sprite import Sprite
 from ultralytics import YOLO
 
 
+def visualize_yunet(image, results, box_color=(0, 255, 0), text_color=(0, 0, 255), fps=None):
+    output = image.copy()
+    landmark_color = [
+        (255,   0,   0), # right eye
+        (  0,   0, 255), # left eye
+        (  0, 255,   0), # nose tip
+        (255,   0, 255), # right mouth corner
+        (  0, 255, 255)  # left mouth corner
+    ]
+
+    if fps is not None:
+        cv2.putText(output, 'FPS: {:.2f}'.format(fps), (0, 15), cv2.FONT_HERSHEY_SIMPLEX, 0.5, text_color)
+
+    for det in results:
+        bbox = det[0:4].astype(np.int32)
+        cv2.rectangle(output, (bbox[0], bbox[1]), (bbox[0]+bbox[2], bbox[1]+bbox[3]), box_color, 2)
+
+        conf = det[-1]
+        cv2.putText(output, '{:.4f}'.format(conf), (bbox[0], bbox[1]+12), cv2.FONT_HERSHEY_DUPLEX, 0.5, text_color)
+
+        landmarks = det[4:14].astype(np.int32).reshape((5,2))
+        for idx, landmark in enumerate(landmarks):
+            cv2.circle(output, landmark, 2, landmark_color[idx], 2)
+    print("visualize called")
+    return output
+
 class VideoSprite(Sprite):
     """비디오 스프라이트 클래스"""
     def __init__(self, x, y, video_source=0, size=(640, 480), ref_image = "data/realsense.jpg", active_modes=None):
@@ -236,40 +262,15 @@ class VideoSprite(Sprite):
                   confThreshold=0.9,
                   nmsThreshold=0.3,
                   topK=5000)
-            h, w, _ = frame.shape
-            print("Set input size:", w, h)
+
         # Inference
+        w, h = frame.shape[1], frame.shape[0]
         self.yunet_model.setInputSize([w, h])
         results = self.yunet_model.infer(frame)
 
-        def visualize(image, results, box_color=(0, 255, 0), text_color=(0, 0, 255), fps=None):
-            output = image.copy()
-            landmark_color = [
-                (255,   0,   0), # right eye
-                (  0,   0, 255), # left eye
-                (  0, 255,   0), # nose tip
-                (255,   0, 255), # right mouth corner
-                (  0, 255, 255)  # left mouth corner
-            ]
-
-            if fps is not None:
-                cv.putText(output, 'FPS: {:.2f}'.format(fps), (0, 15), cv.FONT_HERSHEY_SIMPLEX, 0.5, text_color)
-
-            for det in results:
-                bbox = det[0:4].astype(np.int32)
-                cv.rectangle(output, (bbox[0], bbox[1]), (bbox[0]+bbox[2], bbox[1]+bbox[3]), box_color, 2)
-
-                conf = det[-1]
-                cv.putText(output, '{:.4f}'.format(conf), (bbox[0], bbox[1]+12), cv.FONT_HERSHEY_DUPLEX, 0.5, text_color)
-
-                landmarks = det[4:14].astype(np.int32).reshape((5,2))
-                for idx, landmark in enumerate(landmarks):
-                    cv.circle(output, landmark, 2, landmark_color[idx], 2)
-
-            return output
-
         # Draw results on the input image
-        frame = visualize(frame, results)
+        frame = visualize_yunet(frame, results)
+        print(results)
 
         return frame
 
