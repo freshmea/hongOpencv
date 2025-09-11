@@ -31,7 +31,7 @@ backend_target_pairs = [
 
 parser = argparse.ArgumentParser(
     description="SFace: Sigmoid-Constrained Hypersphere Loss for Robust Face Recognition (https://ieeexplore.ieee.org/document/9318547)")
-parser.add_argument('--target', '-t', type=str, default='data/face/choi.jpg',
+parser.add_argument('--target', '-t', type=str, default='data/face/12.jpg',
                     help='Usage: Set path to the input image 1 (target face).')
 parser.add_argument('--query', '-q', type=str, default='data/face/01.jpg',
                     help='Usage: Set path to the input image 2 (query).')

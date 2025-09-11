@@ -9,7 +9,15 @@ import sys
 
 import cv2 as cv
 import numpy as np
-from sface import SFace
+
+# Check OpenCV version
+opencv_python_version = lambda str_version: tuple(map(int, (str_version.split("."))))
+assert opencv_python_version(cv.__version__) >= opencv_python_version("4.10.0"), \
+       "Please install latest opencv-python for benchmark: python3 -m pip install --upgrade opencv-python"
+
+# from sface import SFaceORT as SFace
+
+from sface_ort import SFaceORT as SFace
 from yunet_ort import YuNet
 
 # Valid combinations of backends and targets
@@ -23,11 +31,11 @@ backend_target_pairs = [
 
 parser = argparse.ArgumentParser(
     description="SFace: Sigmoid-Constrained Hypersphere Loss for Robust Face Recognition (https://ieeexplore.ieee.org/document/9318547)")
-parser.add_argument('--target', '-t', type=str,
+parser.add_argument('--target', '-t', type=str, default='data/face/12.jpg',
                     help='Usage: Set path to the input image 1 (target face).')
-parser.add_argument('--query', '-q', type=str,
+parser.add_argument('--query', '-q', type=str, default='data/face/01.jpg',
                     help='Usage: Set path to the input image 2 (query).')
-parser.add_argument('--model', '-m', type=str, default='data/face_recognition_sface_2021dec.onnx',
+parser.add_argument('--model', '-m', type=str, default='data/face_recognition_sface_2021dec_fixed.onnx',
                     help='Usage: Set model path, defaults to face_recognition_sface_2021dec.onnx.')
 parser.add_argument('--backend_target', '-bt', type=int, default=0,
                     help='''Choose one of the backend-target pair to run this demo:
@@ -114,28 +122,36 @@ if __name__ == '__main__':
                      backendId=backend_id,
                      targetId=target_id)
 
-    # img 1 처리
-    img1 = cv.imread('data/face/15.jpg')
-    w, h = img1.shape[0:2]
-    max_ratio = 640.0 / max(w, h)
-    img1 = cv.resize(img1, (int(h * max_ratio), int(w * max_ratio)), interpolation=cv.INTER_LINEAR)
-    detector.setInputSize([img1.shape[1], img1.shape[0]])
-    faces1 = detector.infer(img1)
-
-    # img2 처리
-    # img2 = cv.imread('data/face/30.jpg')
+    img1 = cv.imread(args.target)
+    # img2 = cv.imread(args.query)
     cap = cv.VideoCapture(4)
-    tm = cv.TickMeter()
+    h1, w1 = img1.shape[:2]
+    if max(h1, w1) > 640:
+        scale = 640 / max(h1, w1)
+        img1 = cv.resize(img1, (int(w1 * scale), int(h1 * scale)))
+
     while True:
         ret, img2 = cap.read()
-        # 비율을 맞춰서 최대값이 640 이되게 resize
-        tm.start()
-        w, h = img2.shape[0:2]
-        max_ratio = 640.0 / max(w, h)
-        img2 = cv.resize(img2, (int(h * max_ratio), int(w * max_ratio)), interpolation=cv.INTER_LINEAR)
+        if not ret:
+            print("Failed to capture image")
+            break
+        # 비율을 유지해서 resize 를 해줘 640 이하로 맞춘다.
+        h2, w2 = img2.shape[:2]
+        if max(h2, w2) > 640:
+            scale = 640 / max(h2, w2)
+            img2 = cv.resize(img2, (int(w2 * scale), int(h2 * scale)))
+
         # Detect faces
+        detector.setInputSize([img1.shape[1], img1.shape[0]])
+        faces1 = detector.infer(img1)
+        # assert faces1.shape[0] > 0, 'Cannot find a face in {}'.format(args.target)
+        if faces1.shape[0] < 1:
+            continue
         detector.setInputSize([img2.shape[1], img2.shape[0]])
         faces2 = detector.infer(img2)
+        # assert faces2.shape[0] > 0, 'Cannot find a face in {}'.format(args.query)
+        if faces2.shape[0] < 1:
+            continue
 
         # Match
         scores = []
@@ -144,14 +160,22 @@ if __name__ == '__main__':
             result = recognizer.match(img1, faces1[0][:-1], img2, face[:-1])
             scores.append(result[0])
             matches.append(result[1])
+
         # Draw results
         image = visualize(img1, faces1, img2, faces2, matches, scores)
-        tm.stop()
-        print("scores:", scores)
-        print("matches:", matches)
-        print(f"FPS: {tm.getFPS():.2f}")
-        print(f"delayed time : {1000/tm.getFPS():.2f} ms")
-        tm.reset()
-        cv.imshow('SFace Demo', image)
-        if cv.waitKey(1) == 27:
+        print('Scores: ', scores)
+        print('Matches: ', matches)
+
+        # Save results if save is true
+        if args.save:
+            print('Resutls saved to result.jpg\n')
+            cv.imwrite('result.jpg', image)
+
+        # Visualize results in a new window
+        if args.vis:
+            cv.namedWindow("SFace Demo", cv.WINDOW_AUTOSIZE)
+            cv.imshow("SFace Demo", image)
+            cv.waitKey(0)
+        cv.imshow("SFace Demo", image)
+        if cv.waitKey(1) == 27:  # ESC key to break
             break
