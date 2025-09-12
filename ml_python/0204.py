@@ -4,28 +4,28 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 #1: load train data
-with np.load('./data/0201_data40.npz') as X: # '0201_data50.npz'
+with np.load('data/0201_data40.npz') as X: # '0201_data50.npz'
     x_train = X['x_train'].astype(np.float32)
     y_train = X['y_train'].astype(np.int32) #np.float32
     height, width = X['size']
 
 #2: Decision tree : create, train, and predict
 #2-1
-model = cv2.ml.DTrees_create()
-model.setCVFolds(1) # If CVFolds > 1 then, tree pruning using cross-validation is not implemented
-model.setMaxDepth(10)
-model.setMaxCategories(2) # default:10
+# model = cv2.ml.DTrees_create()
+# model.setCVFolds(1) # If CVFolds > 1 then, tree pruning using cross-validation is not implemented
+# model.setMaxDepth(10)
+# model.setMaxCategories(2) # default:10
 
 #2-2
-##model = cv2.ml.Boost_create()
-##model.setBoostType(cv2.ml.BOOST_REAL)
-##model.setMaxDepth(10)
-##model.setWeakCount(100) # default
+# model = cv2.ml.Boost_create()
+# model.setBoostType(cv2.ml.BOOST_REAL)
+# model.setMaxDepth(10)
+# model.setWeakCount(100) # default
 
 #2-3
-##model = cv2.ml.RTrees_create()
-##model.setMaxDepth(100)
-##model.setTermCriteria(( cv2.TERM_CRITERIA_COUNT | cv2.TERM_CRITERIA_EPS, 100, 0.01))
+model = cv2.ml.RTrees_create()
+model.setMaxDepth(100)
+model.setTermCriteria(( cv2.TERM_CRITERIA_COUNT | cv2.TERM_CRITERIA_EPS, 100, 0.01))
 
 #3
 ret = model.train(samples=x_train, layout=cv2.ml.ROW_SAMPLE, responses=y_train)
