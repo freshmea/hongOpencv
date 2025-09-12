@@ -75,5 +75,5 @@
 
 - 1교시 : 복습 및 프로젝트 변경사항, 머신러닝, 딥러닝- 개요 설명
 - 2교시 : knn, decision tree, random forest, boost
-- 3교시 : sface 업데이트, project 파일에 sface 적용
-- 4교시 : sface 의 한계, 프로젝트 코드 변경시 최적화 주의사항
+- 3교시 : svm, em, mlp, 딥러닝 설명.
+- 4교시 :

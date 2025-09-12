@@ -18,7 +18,6 @@ def calulateStat(X):
     return mu, var
 
 def normalizeScale(X, mu, var):
-
     eps = 0.00001
     X_hat = (X-mu)/(np.sqrt(var + eps))
     return X_hat
@@ -28,9 +27,9 @@ print("mu=", mu)
 print("var=", var)
 x_train = normalizeScale(X_train, mu, var)
 
-##from sklearn.preprocessing import StandardScaler
-##scaler = StandardScaler()
-##x_train = scaler.fit_transform(X_train)
+# from sklearn.preprocessing import StandardScaler
+# scaler = StandardScaler()
+# x_train = scaler.fit_transform(X_train)
 
 #3: a logistic regression classifier
 #3-1
