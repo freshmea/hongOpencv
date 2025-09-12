@@ -26,6 +26,8 @@ model.setTermCriteria((cv2.TERM_CRITERIA_EPS+
 
 #3: train
 #3-1
+# 데이터 정제!
+# 데이터로더 -> 배치사이즈 batch -> epoch(전체 데이터 1회양) -> shuffle -> 100 epoch
 ret = model.train(samples=x_train, layout=cv2.ml.ROW_SAMPLE, responses=y_train)
 
 #3-2: weights
@@ -34,7 +36,7 @@ for i in range(layerSize.shape[0] + 2):
     print("weights[{}] = {}".format(i, model.getWeights(i)))
 
 #4
-ret, y_out = model.predict(x_train)
+ret, y_out = model.predict(x_train) # infer. 순전파.
 print("y_out=", y_out)
 ##y_pred = np.round(y_out)
 y_pred = np.int32(y_out>0.5)
