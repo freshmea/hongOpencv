@@ -6,7 +6,7 @@ import numpy as np
 np.set_printoptions(precision=2, suppress=True)
 
 #1: load train data
-with np.load('./data/0201_data40.npz') as X: # '0201_data50.npz'
+with np.load('data/0201_data40.npz') as X: # '0201_data50.npz'
     x_train = X['x_train'].astype(np.float32)
     y_train = X['y_train'].astype(np.int32) #np.float32
     height, width = X['size']
