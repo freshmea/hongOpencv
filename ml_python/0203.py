@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 #1: load train data
-with np.load('./data/0201_data40.npz') as X:   # '0201_data50.npz'
+with np.load('data/0201_data40.npz') as X:   # '0201_data50.npz'
     x_train = X['x_train'].astype(np.float32)
     y_train = X['y_train'].astype(np.int32)    #np.float32
     height, width = X['size']
@@ -12,8 +12,12 @@ with np.load('./data/0201_data40.npz') as X:   # '0201_data50.npz'
 #2: k-nearest neighbours: create, train, and predict
 #2-1
 model = cv2.ml.KNearest_create()
+tm = cv2.TickMeter()
+tm.start()
 ret = model.train(samples=x_train, layout=cv2.ml.ROW_SAMPLE, responses=y_train)
-
+tm.stop()
+print("train time: %fms" % (tm.getTimeMilli()))
+tm.reset()
 #2-2: x_test-> predictions -> pred
 step = 2
 xx, yy = np.meshgrid(np.arange(0, width,  step),
@@ -21,7 +25,11 @@ xx, yy = np.meshgrid(np.arange(0, width,  step),
 
 x_test = np.float32(np.c_[xx.ravel(), yy.ravel()])
 k = 3 # 1, 3, 5
+tm.start()
 ret, pred = model.predict(x_test, k) # pred.shape= (75000, 1)
+tm.stop()
+print("predict time: %fms" % (tm.getTimeMilli()/75000))
+tm.reset()
 pred = pred.reshape(xx.shape)        # pred.shape= (250, 300)
 
 #3: display data and result
