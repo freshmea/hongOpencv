@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 #1: load train data
-with np.load('./data/0201_data50.npz') as X:
+with np.load('data/0201_data50.npz') as X:
     x_train = X['x_train'].astype(np.float32)
     y_train = X['y_train'].astype(np.int32) #np.float32
     height, width = X['size']
@@ -23,7 +23,7 @@ ret = model.train(samples=x_train, layout=cv2.ml.ROW_SAMPLE, responses=y_train)
 #2-2
 x_test = np.array([[100, 200], [200, 250], [300, 300]], dtype = np.float32)
 k = 3   # 1, 3, 5
-ret, y_pred = model.predict(x_test, k)
+ret, y_pred = model.predict(x_test, k) # 순전파, infer, forward, predict
 print("y_pred=", y_pred)
 
 #2-3
