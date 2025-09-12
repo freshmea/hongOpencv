@@ -15,9 +15,9 @@ opencv_python_version = lambda str_version: tuple(map(int, (str_version.split(".
 assert opencv_python_version(cv.__version__) >= opencv_python_version("4.10.0"), \
        "Please install latest opencv-python for benchmark: python3 -m pip install --upgrade opencv-python"
 
-# from sface import SFaceORT as SFace
+# from sface_ort import SFaceORT as SFace
 
-from sface_ori import SFace
+from sface import SFace
 from yunet_ort import YuNet
 
 # Valid combinations of backends and targets
@@ -31,7 +31,7 @@ backend_target_pairs = [
 
 parser = argparse.ArgumentParser(
     description="SFace: Sigmoid-Constrained Hypersphere Loss for Robust Face Recognition (https://ieeexplore.ieee.org/document/9318547)")
-parser.add_argument('--target', '-t', type=str, default='data/face/12.jpg',
+parser.add_argument('--target', '-t', type=str, default='data/face/choi.jpg',
                     help='Usage: Set path to the input image 1 (target face).')
 parser.add_argument('--query', '-q', type=str, default='data/face/01.jpg',
                     help='Usage: Set path to the input image 2 (query).')

@@ -329,6 +329,7 @@ class VideoSprite(Sprite):
 
     def sface_process(self, frame):
         if not hasattr(self, 'sface_model'):
+            # from sface_ort import SFaceORT as SFace
             from sface import SFace
             from yunet_ort import YuNet
             self.yunet_model2 = YuNet(modelPath='data/face_detection_yunet_2023mar.onnx',
@@ -347,7 +348,7 @@ class VideoSprite(Sprite):
                 self.img1 = cv2.resize(self.img1, (int(w1 * scale), int(h1 * scale)))
             self.yunet_model2.setInputSize([self.img1.shape[1], self.img1.shape[0]])
             self.faces1 = self.yunet_model2.infer(self.img1)
-            self.feature1 = self.sface_model.infer(self.img1, self.faces1[0][:-1])
+            # self.feature1 = self.sface_model.infer(self.img1, self.faces1[0][:-1])
 
         h1, w1 = frame.shape[:2]
         if max(h1, w1) > 640:
@@ -358,8 +359,7 @@ class VideoSprite(Sprite):
         self.scores = []
         self.matches = []
         for face in self.faces:
-            self.feature2 = self.sface_model.infer(frame, face[:-1])
-            cosine_score = self.sface_model._model.match(self.feature1, self.feature2, 0)
+            cosine_score, is_match = self.sface_model.match(frame, face[:-1], self.img1, self.faces1[0][:-1])
             self.scores.append(cosine_score)
             self.matches.append(1 if cosine_score >= self.sface_model._threshold_cosine else 0)
         image = visualize_sface(self.img1, self.faces1, frame, self.faces, self.matches, self.scores)
