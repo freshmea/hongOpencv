@@ -15,9 +15,9 @@ opencv_python_version = lambda str_version: tuple(map(int, (str_version.split(".
 assert opencv_python_version(cv.__version__) >= opencv_python_version("4.10.0"), \
        "Please install latest opencv-python for benchmark: python3 -m pip install --upgrade opencv-python"
 
-# from sface import SFaceORT as SFace
+from sface import SFace
 
-from sface_ort import SFaceORT as SFace
+# from sface_ort import SFaceORT as SFace
 from yunet_ort import YuNet
 
 # Valid combinations of backends and targets
