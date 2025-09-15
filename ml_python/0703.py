@@ -22,7 +22,7 @@ H, W, C = src.shape
 
 #3
 #3-1
-path = "./dnn/PreTrained/mask_rcnn_inception_v2_coco_2018_01_28/"
+path = "data/"
 net = cv2.dnn.readNet(path + "frozen_inference_graph_mask.pb",
                       path + "mask_rcnn_inception_v2_coco_2018_01_28.pbtxt")
 
