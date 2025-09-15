@@ -6,27 +6,27 @@ import cv2
 import numpy as np
 
 #1
-with open("./dnn/PreTrained/coco90-2017.names", "r") as f:
+with open("data/coco90-2017.names", "r") as f:
     class_names = [line.strip() for line in f.readlines()]
 
 COLORS = [(0, 0, 255), (0, 255, 0), (255, 0, 0), (255, 255, 0), (0, 255, 255), (255, 0, 255), (255, 128, 255)]
 
 #2
-image_name = ['./data/dog.jpg',   './data/person.jpg',
-              './data/horses.jpg','./data/eagle.jpg']
+image_name = ['data/dog.jpg',   'data/person.jpg',
+              'data/horses.jpg','data/eagle.jpg']
 src = cv2.imread(image_name[1])
 height, width, channels = src.shape
 
 #3
 #3-1
-path = "./dnn/PreTrained/faster_rcnn_resnet50_coco_2018_01_28/"
+path = "data/"
 net = cv2.dnn.readNet(path + "frozen_inference_graph.pb",
                       path + "faster_rcnn_resnet50_coco_2018_01_28.pbtxt")
 
 #3-2
 blob = cv2.dnn.blobFromImage(src, size=(300, 300), swapRB=True, crop=False)
 net.setInput(blob)
-outs = net.forward()
+outs = net.forward() # predict, infer, detect, ...
 print("outs.shape = ", outs.shape)
 
 ##model = cv2.dnn_DetectionModel(net)
