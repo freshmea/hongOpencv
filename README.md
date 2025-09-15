@@ -76,4 +76,11 @@
 - 1교시 : 복습 및 프로젝트 변경사항, 머신러닝, 딥러닝- 개요 설명
 - 2교시 : knn, decision tree, random forest, boost
 - 3교시 : svm, em, mlp, 딥러닝 설명.
+- 4교시 : 드론 영상 분석 프로젝트 설명. - 맘보패럿 기기 설명
+
+## 2025_9_15
+
+- 1교시 : 복습 및 프로젝트 변경사항. ONNX 설명 및 실습.
+- 2교시 : tensorflow 프레임의 저장 및 onnx 변환 실습. pytorch 프레임의 저장 및 onnx 변환 실습.
+- 3교시 : RCNN, faster RCNN, mask RCNN 설명.
 - 4교시 :
