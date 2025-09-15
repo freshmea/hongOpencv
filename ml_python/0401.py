@@ -40,7 +40,8 @@ ret = model.fit(x_train, y_train, epochs=100, verbose=2) # train, fit
 ##print('latest=', latest)
 
 # 3-4: model save using Tensorflow SavedModel
-model.save("./dnn/SAVED_MODEL") # to load in  0402.py, 0403.py
+model.save("data/SAVED_MODEL.keras") # to load in  0402.py, 0403.py
+model.save("data/SAVED_MODEL.h5") # to load in  0402.py, 0403.py
 
 #4 모델 동결(freezing): pb 파일 생성, freeze_graph.py
 from tensorflow.python.framework.convert_to_constants import (
