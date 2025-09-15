@@ -1,4 +1,5 @@
 #0401.py
+# install : pip install tensorflow
 '''
 ref: 텐서플로 딥러닝 프로그래밍, 가메출판사
 '''
@@ -28,7 +29,7 @@ opt = tf.keras.optimizers.Adam(learning_rate=0.1)
 model.compile(optimizer=opt, loss='mse', metrics=['accuracy'])
 
 #3-2
-ret = model.fit(x_train, y_train, epochs=100, verbose=2)
+ret = model.fit(x_train, y_train, epochs=100, verbose=2) # train, fit
 
 #3-3: Checkpoint, # to load in  0402.py
 ##filepath = "./dnn/ckpt/0401-{epoch:04d}.ckpt"
