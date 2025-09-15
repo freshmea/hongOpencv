@@ -1,5 +1,6 @@
 #0401.py
-# install : pip install tensorflow
+# install : pip install "tensorflow==2.15.*"
+# install : pip install "keras==2.15.*"
 '''
 ref: 텐서플로 딥러닝 프로그래밍, 가메출판사
 '''
@@ -40,9 +41,9 @@ ret = model.fit(x_train, y_train, epochs=100, verbose=2) # train, fit
 ##print('latest=', latest)
 
 # 3-4: model save using Tensorflow SavedModel
-model.save("data/SAVED_MODEL.keras") # to load in  0402.py, 0403.py
-model.save("data/SAVED_MODEL.h5") # to load in  0402.py, 0403.py
-
+model.save("./dnn/SAVED_MODEL.keras") # to load in  0402.py, 0403.py
+model.save("./dnn/SAVED_MODEL.h5") # to load in  0402.py, 0403.py
+# model.save("./dnn/saved_xor/xor.pb")
 #4 모델 동결(freezing): pb 파일 생성, freeze_graph.py
 from tensorflow.python.framework.convert_to_constants import (
     convert_variables_to_constants_v2,
@@ -67,3 +68,4 @@ def freeze_model(model, out_file):
                       name=out_file,
                       as_text=False)
 freeze_model(model, "XOR.pb")
+
