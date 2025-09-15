@@ -72,7 +72,7 @@ if __name__ == '__main__':
 
     # Read from args.input
     _input = 0 if args.input is None else args.input
-    video = cv.VideoCapture(_input)
+    video = cv.VideoCapture(4)
     # fps = video.get(cv.CAP_PROP_FPS)
     # print('Input source fps: {:.2f}'.format(fps))
 
