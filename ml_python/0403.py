@@ -21,7 +21,7 @@ print('pred=', pred)
 
 import onnx
 
-model.output_names = [t.name.split(":")[0] for t in model.outputs]
+# model.output_names = [t.name.split(":")[0] for t in model.outputs]
 #3:  model -> ONNX ( pip install tf2onnx )
 #3-1
 import tf2onnx

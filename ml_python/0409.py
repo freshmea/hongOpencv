@@ -58,7 +58,7 @@ loss_fn  = torch.nn.MSELoss()
 optimizer = torch.optim.Adam(model.parameters(), lr=0.1)
 
 #3-2
-#model.train()
+model.train()
 for epoch in range(100):
     optimizer.zero_grad()
     out = model(x_train)
@@ -104,7 +104,7 @@ print('ort_pred=', ort_pred)
 
 #7: save and load PyTorch model
 torch.save(model,  "./dnn/XOR.pt")
-model = torch.load( "./dnn/XOR.pt")
+model = torch.load( "./dnn/XOR.pt", weights_only=False)
 model.eval()
 with torch.no_grad():
     out = model(x_train)
