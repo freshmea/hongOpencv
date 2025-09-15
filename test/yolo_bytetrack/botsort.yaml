@@ -1,0 +1,32 @@
+# BoT-SORT 트래커 설정
+tracker_type: botsort
+
+# BoT-SORT 주요 매개변수
+track_thresh: 0.3 # 트래킹 신뢰도 임계값 (더 낮춤)
+track_high_thresh: 0.5 # 높은 신뢰도 임계값 (낮춤)
+track_low_thresh: 0.05 # 낮은 신뢰도 임계값 (더 낮춤)
+new_track_thresh: 0.6 # 새로운 트랙 생성 임계값 (높임)
+track_buffer: 120 # 손실된 트랙을 유지하는 프레임 수 (4초로 늘림)
+match_thresh: 0.6 # 트래킹 매칭 임계값 (더 낮춤)
+frame_rate: 30 # 비디오 시퀀스의 FPS
+fuse_score: true # 점수 융합 활성화
+
+# 모션 모델 매개변수
+kalman_format: "default" # 칼만 필터 형식
+motion: "KalmanFilterXYWH" # BoT-SORT용 모션 모델
+
+# 재식별(Re-identification) 매개변수
+with_reid: false # ReID 비활성화로 더 안정적인 추적
+model: auto # ReID 모델 (auto로 자동 선택)
+reid_batch_size: 64 # ReID 배치 크기
+reid_fp16: true # ReID FP16 사용
+proximity_thresh: 0.8 # 공간적 근접성 임계값 (더 높임)
+appearance_thresh: 0.5 # 외형 유사성 임계값 (더 높임)
+
+# 탐지 매개변수
+min_box_area: 10 # 작은 박스 필터링
+aspect_ratio_thresh: 1.6 # 종횡비 임계값
+
+# BoT-SORT 특화 기능
+gmc_method: "sparseOptFlow" # 전역 모션 보상 방법
+cmc_method: "sparseOptFlow" # 카메라 모션 보상 방법
