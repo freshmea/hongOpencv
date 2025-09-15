@@ -8,7 +8,7 @@ import cv2
 import numpy as np
 
 #1
-with open("./dnn/PreTrained/coco90-2017.names", "r") as f:
+with open("data/coco90-2017.names", "r") as f:
     class_names = [line.strip() for line in f.readlines()]
 
 COLORS = [(0, 0, 255), (0, 255, 0), (255, 0, 0), (255, 255, 0),
@@ -23,7 +23,7 @@ H, W, C = src.shape
 #3
 #3-1
 path = "./dnn/PreTrained/mask_rcnn_inception_v2_coco_2018_01_28/"
-net = cv2.dnn.readNet(path + "frozen_inference_graph.pb",
+net = cv2.dnn.readNet(path + "frozen_inference_graph_mask.pb",
                       path + "mask_rcnn_inception_v2_coco_2018_01_28.pbtxt")
 
 #3-2
