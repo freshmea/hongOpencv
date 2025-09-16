@@ -83,4 +83,4 @@
 - 1교시 : 복습 및 프로젝트 변경사항. ONNX 설명 및 실습.
 - 2교시 : tensorflow 프레임의 저장 및 onnx 변환 실습. pytorch 프레임의 저장 및 onnx 변환 실습.
 - 3교시 : RCNN, faster RCNN, mask RCNN 설명.
-- 4교시 :
+- 4교시 : SSD 설명. vittrack 을 이용한 물체 추적 코드.

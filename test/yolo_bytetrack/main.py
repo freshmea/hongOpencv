@@ -37,6 +37,8 @@ def load_tracker_config(tracker_path):
             logging.info(f"트랙 버퍼: {config.get('track_buffer', 30)} 프레임")
             logging.info(f"매칭 임계값: {config.get('match_thresh', 0.8)}")
             logging.info(f"외형 임계값: {config.get('appearance_thresh', 0.25)}")
+        logging.info(f"ReID 사용: {config.get('with_reid', False)}")
+        logging.info(f"ReID 모델: {config.get('model', 'auto')}")
 
         return config
 
@@ -46,19 +48,19 @@ def load_tracker_config(tracker_path):
 
 def parse_args():
     p = argparse.ArgumentParser(description="YOLO + (ByteTrack/BoT-SORT) MOT 데모")
-    p.add_argument("--source", type=str, required=True,
+    p.add_argument("--source", type=str, default="4",
                    help="영상 경로 혹은 카메라 인덱스 (예: 0)")
     p.add_argument("--model", type=str, default="yolov8l.pt",
                    help="Ultralytics YOLO 가중치 (예: yolov8n.pt, yolov8l.pt, yolov8x.pt 등)")
-    p.add_argument("--tracker", type=str, default="bytetrack", choices=list(TRACKER_MAP.keys()),
+    p.add_argument("--tracker", type=str, default="botsort", choices=list(TRACKER_MAP.keys()),
                    help="트래커 선택: bytetrack | botsort")
     p.add_argument("--conf", type=float, default=0.1, help="추론 confidence threshold (낮게 설정)")
     p.add_argument("--iou", type=float, default=0.7, help="NMS IoU threshold (높게 설정)")
-    p.add_argument("--device", type=str, default=None,
-                   help="장치 선택 (예: '0' 또는 'cpu'). 기본은 자동")
+    # p.add_argument("--device", type=str, default=4,
+    #                help="장치 선택 (예: '0' 또는 'cpu'). 기본은 자동")
     p.add_argument("--save", type=str, default=None,
                    help="저장할 출력 영상 경로 (예: output.mp4). 지정 안 하면 저장 안 함")
-    p.add_argument("--show", action="store_true", help="윈도우에 실시간 표시")
+    p.add_argument("--show", action="store_true", default=True, help="윈도우에 실시간 표시")
     p.add_argument("--classes", type=int, nargs="*", default=None,
                    help="특정 클래스만 추적 (COCO id 리스트, 예: --classes 0 2 7)")
     return p.parse_args()
@@ -107,7 +109,7 @@ def main():
             persist=True,               # ID 유지 필요
             conf=args.conf,
             iou=args.iou,
-            device=args.device,
+            # device=args.device,
             classes=args.classes
         )
         logging.info("트래커 초기화 성공")
