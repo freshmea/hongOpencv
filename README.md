@@ -84,3 +84,10 @@
 - 2교시 : tensorflow 프레임의 저장 및 onnx 변환 실습. pytorch 프레임의 저장 및 onnx 변환 실습.
 - 3교시 : RCNN, faster RCNN, mask RCNN 설명.
 - 4교시 : SSD 설명. vittrack 을 이용한 물체 추적 코드.
+
+## 2025_9_16
+
+- 1교시 : tracking - yolo_bytetrack 실습
+- 2교시 : resnet18을 이용한 embedding 작성 및 응용 - tracking 물체 재인식
+- 3교시 : insightface 실습 - 얼굴 인식, 나이, 성별, recognition 실습
+- 4교시 :
