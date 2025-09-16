@@ -38,6 +38,8 @@ def load_tracker_config(tracker_path):
 def visualization(frame, boxes):
     xyxy = boxes.xyxy.cpu().numpy()
     cv2.rectangle(frame, (int(xyxy[0][0]), int(xyxy[0][1])), (int(xyxy[0][2]), int(xyxy[0][3])), (255, 0, 0), 2)
+    ids = boxes.id.cpu().numpy().astype(int)
+    cv2.putText(frame, f"{ids}", (int(xyxy[0][0]), int(xyxy[0][1]) - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
     return frame
 model = YOLO("yolo11n.pt")
 logging.info("YOLO 모델 로드 됨: yolo11n")
