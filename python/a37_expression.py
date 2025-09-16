@@ -14,7 +14,7 @@ assert opencv_python_version(cv.__version__) >= opencv_python_version("4.10.0"),
 from facial_fer_model import FacialExpressionRecog
 
 sys.path.append('../face_detection_yunet')
-from yunet import YuNet
+from yunet_ort import YuNet
 
 # Valid combinations of backends and targets
 backend_target_pairs = [
@@ -28,7 +28,7 @@ backend_target_pairs = [
 parser = argparse.ArgumentParser(description='Facial Expression Recognition')
 parser.add_argument('--input', '-i', type=str,
                     help='Path to the input image. Omit for using default camera.')
-parser.add_argument('--model', '-m', type=str, default='./facial_expression_recognition_mobilefacenet_2022july.onnx',
+parser.add_argument('--model', '-m', type=str, default='data/facial_expression_recognition_mobilefacenet_2022july.onnx',
                     help='Path to the facial expression recognition model.')
 parser.add_argument('--backend_target', '-bt', type=int, default=0,
                     help='''Choose one of the backend-target pair to run this demo:
@@ -87,7 +87,7 @@ if __name__ == '__main__':
     backend_id = backend_target_pairs[args.backend_target][0]
     target_id = backend_target_pairs[args.backend_target][1]
 
-    detect_model = YuNet(modelPath='../face_detection_yunet/face_detection_yunet_2023mar.onnx')
+    detect_model = YuNet(modelPath='data/face_detection_yunet/face_detection_yunet_2023mar.onnx')
 
     fer_model = FacialExpressionRecog(modelPath=args.model,
                                       backendId=backend_id,
@@ -115,7 +115,7 @@ if __name__ == '__main__':
             cv.imshow(args.input, image)
             cv.waitKey(0)
     else:  # Omit input to call default camera
-        deviceId = 0
+        deviceId = 4
         cap = cv.VideoCapture(deviceId)
 
         while cv.waitKey(1) < 0:
