@@ -4,5 +4,4 @@ __pycache__/
 venv/
 *.pt
 .mypy_cache/
-*.onnx
 frozen_inference_graph.pb
