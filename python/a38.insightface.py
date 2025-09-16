@@ -3,6 +3,8 @@ import json
 from datetime import datetime
 
 # pip install insightface onnxruntime-gpu
+# pip uninstall opencv-python opencv-contrib-python
+# pip install opencv-python opencv-contrib-python
 import cv2
 import numpy as np
 from insightface.app import FaceAnalysis
