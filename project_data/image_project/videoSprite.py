@@ -415,7 +415,7 @@ class VideoSprite(Sprite):
 
     def deepfake_process(self, frame):
         SIMILARITY_THRESHOLD = 0.3
-        if hasattr(self, 'app') and hasattr(self.app, 'swapper'):
+        if not (hasattr(self, 'app') and hasattr(self.app, 'swapper')):
             from insightface.app import FaceAnalysis
             from insightface.model_zoo import get_model
             providers = ['CUDAExecutionProvider', 'CPUExecutionProvider']
