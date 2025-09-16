@@ -24,7 +24,7 @@ class MainDraw:
 
         # 모드 관리
         self.current_mode = 0
-        self.mode_names = ["캐니", "정상", "블러", "욜로", "ORB 매처", "affine 모드", "perspective 모드", "핸드포즈", "yunet 얼굴인식", "SFace"]
+        self.mode_names = ["캐니", "정상", "블러", "욜로", "ORB 매처", "affine 모드", "perspective 모드", "핸드포즈", "yunet 얼굴인식", "SFace", "wireframe", "deepfake"]
         self.mode_subscribers = []  # 모드 변경을 구독하는 스프라이트들
 
         # 모드별 활성 스프라이트 정의

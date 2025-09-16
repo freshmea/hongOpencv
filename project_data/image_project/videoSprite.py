@@ -5,6 +5,11 @@ from mediapipe import MPHandPose, MPPalmDet, visualize
 from sprite import Sprite
 from ultralytics import YOLO
 
+# 와이어프레임을 그릴 캔버스 크기
+CANVAS_SIZE = (480, 640, 3)
+# 와이어프레임 색상
+WIRELINE_COLOR = (0, 255, 0)
+
 
 def visualize_yunet(image, results, box_color=(0, 255, 0), text_color=(0, 0, 255), fps=None):
     output = image.copy()
@@ -85,13 +90,38 @@ def visualize_sface(img1, faces1, img2, faces2, matches, scores, target_size=[51
 
     return np.concatenate([padded_out1, padded_out2], axis=1)
 
+def draw_wireframe(canvas, landmarks):
+    """
+    68개의 3D 랜드마크를 입력받아 얼굴 와이어프레임을 그립니다.
+    랜드마크 인덱스에 따른 연결 정보입니다.
+    """
+    connections = [
+        list(range(0, 17)),   # 턱선
+        list(range(17, 22)), # 왼쪽 눈썹
+        list(range(22, 27)), # 오른쪽 눈썹
+        list(range(27, 31)), # 코 윗부분
+        list(range(31, 36)), # 코 아랫부분
+        list(range(36, 42)) + [36], # 왼쪽 눈
+        list(range(42, 48)) + [42], # 오른쪽 눈
+        list(range(48, 60)) + [48], # 바깥 입술
+        list(range(60, 68)) + [60]  # 안쪽 입술
+    ]
+    for connection in connections:
+        for i in range(len(connection) - 1):
+            p1_idx, p2_idx = connection[i], connection[i+1]
+
+            # 랜드마크 좌표는 (x, y, z) 이지만, 여기서는 2D 시각화를 위해 x, y만 사용합니다.
+            p1 = (int(landmarks[p1_idx][0]), int(landmarks[p1_idx][1]))
+            p2 = (int(landmarks[p2_idx][0]), int(landmarks[p2_idx][1]))
+
+            cv2.line(canvas, p1, p2, WIRELINE_COLOR, 1)
 class VideoSprite(Sprite):
     """비디오 스프라이트 클래스"""
     def __init__(self, x, y, video_source=0, size=(640, 480), ref_image = "data/realsense.jpg", active_modes=None):
         super().__init__(x, y)
         self.video_source = video_source
         self.size = size
-        self.active_modes = active_modes or [0, 1, 2, 3, 4, 7, 8, 9]  # 기본값: 비디오 관련 모드들
+        self.active_modes = active_modes or [0, 1, 2, 3, 4, 7, 8, 9, 10, 11]  # 기본값: 비디오 관련 모드들
         self.cap = None
         self._load_image()
         self.mode = 0
@@ -366,6 +396,44 @@ class VideoSprite(Sprite):
         print('Scores: ', self.scores)
         return image
 
+    def wireframe_process(self, frame):
+        if not hasattr(self, 'app'):
+            from insightface.app import FaceAnalysis
+            providers = ['CUDAExecutionProvider', 'CPUExecutionProvider']
+            self.app = FaceAnalysis(allowed_modules=['detection', 'landmark_3d_68'], providers=providers)
+            self.app.prepare(ctx_id=0, det_size=(640, 640))
+            print("모델 로드 완료.")
+        faces = self.app.get(frame)
+        if faces:
+            # 가장 큰 얼굴을 대상으로 함
+            main_face = sorted(faces, key=lambda x: (x.bbox[2] - x.bbox[0]) * (x.bbox[3] - x.bbox[1]), reverse=True)[0]
+
+            # 1. 3D 랜드마크 추출 및 와이어프레임 그리기
+            landmarks_3d = main_face.landmark_3d_68
+            draw_wireframe(frame, landmarks_3d) # 원본 영상 위에 그리기
+        return frame
+
+    def deepfake_process(self, frame):
+        SIMILARITY_THRESHOLD = 0.3
+        if hasattr(self, 'app') and hasattr(self.app, 'swapper'):
+            from insightface.app import FaceAnalysis
+            from insightface.model_zoo import get_model
+            providers = ['CUDAExecutionProvider', 'CPUExecutionProvider']
+            REFERENCE_IMAGE_PATH = 'data/face/06.jpg'
+            self.app = FaceAnalysis(providers=providers)
+            self.app.prepare(ctx_id=0, det_size=(640, 640))
+            self.app.swapper = get_model('inswapper_128.onnx', download=True, download_zip=False, providers=providers)
+            img_ref = cv2.imread(REFERENCE_IMAGE_PATH)
+            faces_ref = self.app.get(img_ref)
+            self.main_face = sorted(faces_ref, key=lambda x: (x.bbox[2] - x.bbox[0]) * (x.bbox[3] - x.bbox[1]), reverse=True)[0]
+
+        # 반복 루프
+        faces = self.app.get(frame)
+        target_face = sorted(faces, key=lambda x: (x.bbox[2] - x.bbox[0]) * (x.bbox[3] - x.bbox[1]), reverse=True)[0]
+        frame = self.app.swapper.get(frame, target_face, self.main_face, paste_back=True)
+        return frame
+
+
     def draw(self, target_img):
         if self.image is not None:
             self._blit(target_img, self.x, self.y, self.image)
@@ -389,7 +457,9 @@ class VideoSprite(Sprite):
                 4: self._handle_orb_mode,        # ORB 매처
                 7: self._handle_hand_pose,       # 핸드포즈
                 8: self._handle_yunet_mode,       # yunet 얼굴인식
-                9: self._handle_sface_mode       # SFace
+                9: self._handle_sface_mode,       # SFace
+                10: self._handle_wireframe_mode,   # wireframe
+                11: self._handle_deepfake_mode    # deepfake
             }
 
             # 해당 모드의 핸들러가 있으면 실행, 없으면 기본 처리
@@ -444,6 +514,18 @@ class VideoSprite(Sprite):
         ret, self.image = self.cap.read()
         if ret:
             self.image = self.sface_process(self.image)
+
+    def _handle_wireframe_mode(self):
+        """wireframe 모드 처리"""
+        ret, self.image = self.cap.read()
+        if ret:
+            self.image = self.wireframe_process(self.image)
+
+    def _handle_deepfake_mode(self):
+        """deepfake 모드 처리"""
+        ret, self.image = self.cap.read()
+        if ret:
+            self.image = self.deepfake_process(self.image)
 
     def _handle_default_mode(self):
         """기본 모드 처리 (알 수 없는 모드)"""
