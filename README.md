@@ -95,6 +95,6 @@
 ## 2025_9_17
 
 - 1교시 : OCR - tesseract 실습
-- 2교시 : OCR - paddleocr 실습
+- 2교시 : OCR -
 - 3교시 : OCR - easyocr 실습
 - 4교시 : OCR - onnx ocr 실습
