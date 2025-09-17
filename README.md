@@ -90,4 +90,11 @@
 - 1교시 : tracking - yolo_bytetrack 실습
 - 2교시 : resnet18을 이용한 embedding 작성 및 응용 - tracking 물체 재인식
 - 3교시 : insightface 실습 - 얼굴 인식, 나이, 성별, recognition 실습
-- 4교시 :
+- 4교시 : deepfake 실습 , 프로젝트 파일에 wireframe 및 deepfake 적용
+
+## 2025_9_17
+
+- 1교시 : OCR - tesseract 실습
+- 2교시 : OCR - paddleocr 실습
+- 3교시 : OCR - easyocr 실습
+- 4교시 : OCR - onnx ocr 실습
