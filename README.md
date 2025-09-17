@@ -94,7 +94,7 @@
 
 ## 2025_9_17
 
-- 1교시 : OCR - tesseract 실습
-- 2교시 : OCR -
+- 1교시 : OCR - ppocr_detection, recogntion, lpd_yunet 설명
+- 2교시 : paddle, tesseract 비교 설명
 - 3교시 : OCR - easyocr 실습
 - 4교시 : OCR - onnx ocr 실습
