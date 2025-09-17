@@ -10,111 +10,6 @@ CANVAS_SIZE = (480, 640, 3)
 # 와이어프레임 색상
 WIRELINE_COLOR = (0, 255, 0)
 
-
-def visualize_yunet(image, results, box_color=(0, 255, 0), text_color=(0, 0, 255), fps=None):
-    output = image.copy()
-    landmark_color = [
-        (255,   0,   0), # right eye
-        (  0,   0, 255), # left eye
-        (  0, 255,   0), # nose tip
-        (255,   0, 255), # right mouth corner
-        (  0, 255, 255)  # left mouth corner
-    ]
-
-    if fps is not None:
-        cv2.putText(output, 'FPS: {:.2f}'.format(fps), (0, 15), cv2.FONT_HERSHEY_SIMPLEX, 0.5, text_color)
-
-    for det in results:
-        bbox = det[0:4].astype(np.int32)
-        cv2.rectangle(output, (bbox[0], bbox[1]), (bbox[0]+bbox[2], bbox[1]+bbox[3]), box_color, 2)
-
-        conf = det[-1]
-        cv2.putText(output, '{:.4f}'.format(conf), (bbox[0], bbox[1]+12), cv2.FONT_HERSHEY_DUPLEX, 0.5, text_color)
-
-        landmarks = det[4:14].astype(np.int32).reshape((5,2))
-        for idx, landmark in enumerate(landmarks):
-            cv2.circle(output, landmark, 2, landmark_color[idx], 2)
-    print("visualize called")
-    return output
-
-
-def visualize_sface(img1, faces1, img2, faces2, matches, scores, target_size=[512, 512]): # target_size: (h, w)
-    out1 = img1.copy()
-    out2 = img2.copy()
-    matched_box_color = (0, 255, 0)    # BGR
-    mismatched_box_color = (0, 0, 255) # BGR
-
-    # Resize to 256x256 with the same aspect ratio
-    padded_out1 = np.zeros((target_size[0], target_size[1], 3)).astype(np.uint8)
-    h1, w1, _ = out1.shape
-    ratio1 = min(target_size[0] / out1.shape[0], target_size[1] / out1.shape[1])
-    new_h1 = int(h1 * ratio1)
-    new_w1 = int(w1 * ratio1)
-    resized_out1 = cv2.resize(out1, (new_w1, new_h1), interpolation=cv2.INTER_LINEAR).astype(np.float32)
-    top = max(0, target_size[0] - new_h1) // 2
-    bottom = top + new_h1
-    left = max(0, target_size[1] - new_w1) // 2
-    right = left + new_w1
-    padded_out1[top : bottom, left : right] = resized_out1
-
-    # Draw bbox
-    bbox1 = faces1[0][:4] * ratio1
-    x, y, w, h = bbox1.astype(np.int32)
-    cv2.rectangle(padded_out1, (x + left, y + top), (x + left + w, y + top + h), matched_box_color, 2)
-
-    # Resize to 256x256 with the same aspect ratio
-    padded_out2 = np.zeros((target_size[0], target_size[1], 3)).astype(np.uint8)
-    h2, w2, _ = out2.shape
-    ratio2 = min(target_size[0] / out2.shape[0], target_size[1] / out2.shape[1])
-    new_h2 = int(h2 * ratio2)
-    new_w2 = int(w2 * ratio2)
-    resized_out2 = cv2.resize(out2, (new_w2, new_h2), interpolation=cv2.INTER_LINEAR).astype(np.float32)
-    top = max(0, target_size[0] - new_h2) // 2
-    bottom = top + new_h2
-    left = max(0, target_size[1] - new_w2) // 2
-    right = left + new_w2
-    padded_out2[top : bottom, left : right] = resized_out2
-
-    # Draw bbox
-    assert faces2.shape[0] == len(matches), "number of faces2 needs to match matches"
-    assert len(matches) == len(scores), "number of matches needs to match number of scores"
-    for index, match in enumerate(matches):
-        bbox2 = faces2[index][:4] * ratio2
-        x, y, w, h = bbox2.astype(np.int32)
-        box_color = matched_box_color if match else mismatched_box_color
-        cv2.rectangle(padded_out2, (x + left, y + top), (x + left + w, y + top + h), box_color, 2)
-
-        score = scores[index]
-        text_color = matched_box_color if match else mismatched_box_color
-        cv2.putText(padded_out2, "{:.2f}".format(score), (x + left, y + top - 5), cv2.FONT_HERSHEY_DUPLEX, 0.4, text_color)
-
-    return np.concatenate([padded_out1, padded_out2], axis=1)
-
-def draw_wireframe(canvas, landmarks):
-    """
-    68개의 3D 랜드마크를 입력받아 얼굴 와이어프레임을 그립니다.
-    랜드마크 인덱스에 따른 연결 정보입니다.
-    """
-    connections = [
-        list(range(0, 17)),   # 턱선
-        list(range(17, 22)), # 왼쪽 눈썹
-        list(range(22, 27)), # 오른쪽 눈썹
-        list(range(27, 31)), # 코 윗부분
-        list(range(31, 36)), # 코 아랫부분
-        list(range(36, 42)) + [36], # 왼쪽 눈
-        list(range(42, 48)) + [42], # 오른쪽 눈
-        list(range(48, 60)) + [48], # 바깥 입술
-        list(range(60, 68)) + [60]  # 안쪽 입술
-    ]
-    for connection in connections:
-        for i in range(len(connection) - 1):
-            p1_idx, p2_idx = connection[i], connection[i+1]
-
-            # 랜드마크 좌표는 (x, y, z) 이지만, 여기서는 2D 시각화를 위해 x, y만 사용합니다.
-            p1 = (int(landmarks[p1_idx][0]), int(landmarks[p1_idx][1]))
-            p2 = (int(landmarks[p2_idx][0]), int(landmarks[p2_idx][1]))
-
-            cv2.line(canvas, p1, p2, WIRELINE_COLOR, 1)
 class VideoSprite(Sprite):
     """비디오 스프라이트 클래스"""
     def __init__(self, x, y, video_source=0, size=(640, 480), ref_image = "data/realsense.jpg", active_modes=None):
@@ -161,6 +56,112 @@ class VideoSprite(Sprite):
         if new_path:
             self.image_path = new_path
         self._load_image()
+
+
+    def visualize_yunet(self, image, results, box_color=(0, 255, 0), text_color=(0, 0, 255), fps=None):
+        output = image.copy()
+        landmark_color = [
+            (255,   0,   0), # right eye
+            (  0,   0, 255), # left eye
+            (  0, 255,   0), # nose tip
+            (255,   0, 255), # right mouth corner
+            (  0, 255, 255)  # left mouth corner
+        ]
+
+        if fps is not None:
+            cv2.putText(output, 'FPS: {:.2f}'.format(fps), (0, 15), cv2.FONT_HERSHEY_SIMPLEX, 0.5, text_color)
+
+        for det in results:
+            bbox = det[0:4].astype(np.int32)
+            cv2.rectangle(output, (bbox[0], bbox[1]), (bbox[0]+bbox[2], bbox[1]+bbox[3]), box_color, 2)
+
+            conf = det[-1]
+            cv2.putText(output, '{:.4f}'.format(conf), (bbox[0], bbox[1]+12), cv2.FONT_HERSHEY_DUPLEX, 0.5, text_color)
+
+            landmarks = det[4:14].astype(np.int32).reshape((5,2))
+            for idx, landmark in enumerate(landmarks):
+                cv2.circle(output, landmark, 2, landmark_color[idx], 2)
+        print("visualize called")
+        return output
+
+    def visualize_sface(self, img1, faces1, img2, faces2, matches, scores, target_size=[512, 512]): # target_size: (h, w)
+        out1 = img1.copy()
+        out2 = img2.copy()
+        matched_box_color = (0, 255, 0)    # BGR
+        mismatched_box_color = (0, 0, 255) # BGR
+
+        # Resize to 256x256 with the same aspect ratio
+        padded_out1 = np.zeros((target_size[0], target_size[1], 3)).astype(np.uint8)
+        h1, w1, _ = out1.shape
+        ratio1 = min(target_size[0] / out1.shape[0], target_size[1] / out1.shape[1])
+        new_h1 = int(h1 * ratio1)
+        new_w1 = int(w1 * ratio1)
+        resized_out1 = cv2.resize(out1, (new_w1, new_h1), interpolation=cv2.INTER_LINEAR).astype(np.float32)
+        top = max(0, target_size[0] - new_h1) // 2
+        bottom = top + new_h1
+        left = max(0, target_size[1] - new_w1) // 2
+        right = left + new_w1
+        padded_out1[top : bottom, left : right] = resized_out1
+
+        # Draw bbox
+        bbox1 = faces1[0][:4] * ratio1
+        x, y, w, h = bbox1.astype(np.int32)
+        cv2.rectangle(padded_out1, (x + left, y + top), (x + left + w, y + top + h), matched_box_color, 2)
+
+        # Resize to 256x256 with the same aspect ratio
+        padded_out2 = np.zeros((target_size[0], target_size[1], 3)).astype(np.uint8)
+        h2, w2, _ = out2.shape
+        ratio2 = min(target_size[0] / out2.shape[0], target_size[1] / out2.shape[1])
+        new_h2 = int(h2 * ratio2)
+        new_w2 = int(w2 * ratio2)
+        resized_out2 = cv2.resize(out2, (new_w2, new_h2), interpolation=cv2.INTER_LINEAR).astype(np.float32)
+        top = max(0, target_size[0] - new_h2) // 2
+        bottom = top + new_h2
+        left = max(0, target_size[1] - new_w2) // 2
+        right = left + new_w2
+        padded_out2[top : bottom, left : right] = resized_out2
+
+        # Draw bbox
+        assert faces2.shape[0] == len(matches), "number of faces2 needs to match matches"
+        assert len(matches) == len(scores), "number of matches needs to match number of scores"
+        for index, match in enumerate(matches):
+            bbox2 = faces2[index][:4] * ratio2
+            x, y, w, h = bbox2.astype(np.int32)
+            box_color = matched_box_color if match else mismatched_box_color
+            cv2.rectangle(padded_out2, (x + left, y + top), (x + left + w, y + top + h), box_color, 2)
+
+            score = scores[index]
+            text_color = matched_box_color if match else mismatched_box_color
+            cv2.putText(padded_out2, "{:.2f}".format(score), (x + left, y + top - 5), cv2.FONT_HERSHEY_DUPLEX, 0.4, text_color)
+
+        return np.concatenate([padded_out1, padded_out2], axis=1)
+
+    def draw_wireframe(self,canvas, landmarks):
+        """
+        68개의 3D 랜드마크를 입력받아 얼굴 와이어프레임을 그립니다.
+        랜드마크 인덱스에 따른 연결 정보입니다.
+        """
+        connections = [
+            list(range(0, 17)),   # 턱선
+            list(range(17, 22)), # 왼쪽 눈썹
+            list(range(22, 27)), # 오른쪽 눈썹
+            list(range(27, 31)), # 코 윗부분
+            list(range(31, 36)), # 코 아랫부분
+            list(range(36, 42)) + [36], # 왼쪽 눈
+            list(range(42, 48)) + [42], # 오른쪽 눈
+            list(range(48, 60)) + [48], # 바깥 입술
+            list(range(60, 68)) + [60]  # 안쪽 입술
+        ]
+        for connection in connections:
+            for i in range(len(connection) - 1):
+                p1_idx, p2_idx = connection[i], connection[i+1]
+
+                # 랜드마크 좌표는 (x, y, z) 이지만, 여기서는 2D 시각화를 위해 x, y만 사용합니다.
+                p1 = (int(landmarks[p1_idx][0]), int(landmarks[p1_idx][1]))
+                p2 = (int(landmarks[p2_idx][0]), int(landmarks[p2_idx][1]))
+
+                cv2.line(canvas, p1, p2, WIRELINE_COLOR, 1)
+
 
     def yolo_process(self, frame):
         if not hasattr(self, 'yolo_model'):
@@ -352,7 +353,7 @@ class VideoSprite(Sprite):
         results = self.yunet_model.infer(frame)
 
         # Draw results on the input image
-        frame = visualize_yunet(frame, results)
+        frame = self.visualize_yunet(frame, results)
         print(results)
 
         return frame
@@ -371,7 +372,7 @@ class VideoSprite(Sprite):
                        disType=0,
                        backendId=0,
                        targetId=0)
-            self.img1 = cv2.imread('data/face/15.jpg')
+            self.img1 = cv2.imread('data/face/choi.jpg')
             h1, w1 = self.img1.shape[:2]
             if max(h1, w1) > 640:
                 scale = 640 / max(h1, w1)
@@ -392,7 +393,7 @@ class VideoSprite(Sprite):
             cosine_score, is_match = self.sface_model.match(frame, face[:-1], self.img1, self.faces1[0][:-1])
             self.scores.append(cosine_score)
             self.matches.append(1 if cosine_score >= self.sface_model._threshold_cosine else 0)
-        image = visualize_sface(self.img1, self.faces1, frame, self.faces, self.matches, self.scores)
+        image = self.visualize_sface(self.img1, self.faces1, frame, self.faces, self.matches, self.scores)
         print('Scores: ', self.scores)
         return image
 
@@ -410,7 +411,7 @@ class VideoSprite(Sprite):
 
             # 1. 3D 랜드마크 추출 및 와이어프레임 그리기
             landmarks_3d = main_face.landmark_3d_68
-            draw_wireframe(frame, landmarks_3d) # 원본 영상 위에 그리기
+            self.draw_wireframe(frame, landmarks_3d) # 원본 영상 위에 그리기
         return frame
 
     def deepfake_process(self, frame):
