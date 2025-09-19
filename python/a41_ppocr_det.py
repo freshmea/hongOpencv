@@ -119,8 +119,13 @@ if __name__ == '__main__':
             cv.imshow(args.input, original_image)
             cv.waitKey(0)
     else: # Omit input to call default camera
-        deviceId = 4
+        deviceId = 0
         cap = cv.VideoCapture(deviceId)
+
+        cap.set(cv.CAP_PROP_FOURCC, cv.VideoWriter_fourcc(*'MJPG'))
+        cap.set(cv.CAP_PROP_FRAME_WIDTH, 640)
+        cap.set(cv.CAP_PROP_FRAME_HEIGHT, 480)
+        cap.set(cv.CAP_PROP_FPS, 30)
 
         tm = cv.TickMeter()
         while cv.waitKey(1) < 0:
